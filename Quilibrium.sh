@@ -46,26 +46,5 @@ git clone https://github.com/quilibriumnetwork/ceremonyclient
 # Navigate to ceremonyclient/node directory
 cd ceremonyclient/node 
 
-# 写入脚本
-cat > auto.sh <<EOF
-#!/bin/bash
-while true
-do
-	ps -ef | grep "node" | grep -v "grep"
-	if [ "$?" -eq 1 ]
-		then 
-		echo "process has restarting..."
-		GOEXPERIMENT=arenas go run ./...
-		echo "process has been restarted!"
-	else
-		echo "process already started!"
-	fi
-	sleep 10
-done
-EOF
-
-# 赋予权限
-chmod +x auto.sh
-
 # Create a screen session and run the command
-screen -dmS Quili bash -c './auto.sh'
+screen -dmS Quili bash -c 'GOEXPERIMENT=arenas go run ./...'
