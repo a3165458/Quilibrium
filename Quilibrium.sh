@@ -23,7 +23,7 @@ echo "sysctl 配置已重新加载"
 sudo apt update && sudo apt -y upgrade 
 
 # Install wget, screen, and git without any prompts
-sudo apt install git ufw bison screen -y
+sudo apt install git ufw bison screen binutils gcc make -y
 
 
 # Install GVM
