@@ -32,12 +32,6 @@ function check_and_set_alias() {
 function install_node() {
 
 
-# 检查是否以root用户执行脚本
-if [ "$(id -u)" != "0" ]; then
-   echo "该脚本必须以root权限运行" 1>&2
-   exit 1
-fi
-
 # 增加swap空间
 sudo mkdir /swap
 sudo fallocate -l 24G /swap/swapfile
