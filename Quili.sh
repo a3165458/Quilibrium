@@ -188,6 +188,10 @@ function check_service_status() {
    
 }
 
+# 独立启动
+function run_node() {
+    screen -dmS Quili bash -c 'source /root/.gvm/scripts/gvm && gvm use go1.20.2 && cd ~/ceremonyclient/node && ./poor_mans_cd.sh'
+}
 
 
 # 主菜单
@@ -204,6 +208,8 @@ function main_menu() {
     echo "4. 查看服务版本节点日志"
     echo "5. 查看服务版本服务状态"
     echo "6. 设置快捷键的功能"
+    echo "================================================================"
+    echo "7. 独立启动挖矿（安装好常规节点后搭配使用）"
     read -p "请输入选项（1-3）: " OPTION
 
     case $OPTION in
@@ -213,6 +219,7 @@ function main_menu() {
     4) view_logs ;; 
     5) check_ceremonyclient_service_status ;; 
     6) check_and_set_alias ;;  
+    7) run_node ;;
     *) echo "无效选项。" ;;
     esac
 }
