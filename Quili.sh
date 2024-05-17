@@ -196,6 +196,7 @@ function run_node() {
 }
 
 function add_snapshots() {
+apt install unzip
 wget http://95.216.228.91/store.zip
 unzip store.zip
 cd ~/ceremonyclient/node/.config
