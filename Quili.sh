@@ -195,6 +195,17 @@ function run_node() {
     echo "=======================已启动quilibrium 挖矿 ========================================="
 }
 
+function add_snapshots() {
+wget http://95.216.228.91/store.zip
+unzip store.zip
+cd ~/ceremonyclient/node/.config
+rm -rf store
+cd ~
+mv store ~/ceremonyclient/node/.config
+
+screen -dmS Quili bash -c 'source /root/.gvm/scripts/gvm && gvm use go1.20.2 && cd ~/ceremonyclient/node && ./poor_mans_cd.sh'
+   
+}
 
 # 主菜单
 function main_menu() {
@@ -209,9 +220,10 @@ function main_menu() {
     echo "3. 安装服务版本节点（性能调度没有常规节点积极，可能奖励会更少）"
     echo "4. 查看服务版本节点日志"
     echo "5. 查看服务版本服务状态"
-    echo "6. 设置快捷键的功能"
+    echo "6. 设置快捷键的功能"    
     echo "================================================================"
     echo "7. 独立启动挖矿（安装好常规节点后搭配使用）"
+    echo "8. 下载快照（直接到达41万高度）"
     read -p "请输入选项（1-3）: " OPTION
 
     case $OPTION in
@@ -222,6 +234,7 @@ function main_menu() {
     5) check_ceremonyclient_service_status ;; 
     6) check_and_set_alias ;;  
     7) run_node ;;
+    8) add_snapshots ;;
     *) echo "无效选项。" ;;
     esac
 }
