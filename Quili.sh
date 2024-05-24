@@ -207,6 +207,16 @@ screen -dmS Quili bash -c 'source /root/.gvm/scripts/gvm && gvm use go1.20.2 && 
    
 }
 
+function backup_set() {
+mkdir -p ~/backup
+cat ~/ceremonyclient/node/.config/config.yml > ~/backup/config.txt
+cat ~/ceremonyclient/node/.config/keys.yml > ~/backup/keys.txt
+
+echo "=======================备份完成，请到执行cd ~/backup 下查看备份文件========================================="
+
+}
+
+
 # 主菜单
 function main_menu() {
     clear
@@ -221,10 +231,12 @@ function main_menu() {
     echo "4. 查看服务版本节点日志"
     echo "5. 查看服务版本服务状态"
     echo "6. 设置快捷键的功能"    
-    echo "================================================================"
+    echo "=======================单独使用功能============================="
     echo "7. 独立启动挖矿（安装好常规节点后搭配使用）"
     echo "8. 下载快照（直接到达43万高度）"
-    read -p "请输入选项（1-3）: " OPTION
+    echo "=========================备份功能================================"
+    echo "9. 备份文件"
+    read -p "请输入选项（1-9）: " OPTION
 
     case $OPTION in
     1) install_node ;;
@@ -235,6 +247,7 @@ function main_menu() {
     6) check_and_set_alias ;;  
     7) run_node ;;
     8) add_snapshots ;;
+    9) backup_set ;;
     *) echo "无效选项。" ;;
     esac
 }
