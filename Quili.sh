@@ -213,7 +213,7 @@ mkdir -p ~/backup
 cat ~/ceremonyclient/node/.config/config.yml > ~/backup/config.txt
 cat ~/ceremonyclient/node/.config/keys.yml > ~/backup/keys.txt
 
-echo "=======================备份完成，请到执行cd ~/backup 下查看备份文件========================================="
+echo "=======================备份完成，请执行cd ~/backup 查看备份文件========================================="
 
 }
 
