@@ -76,6 +76,7 @@ git clone https://github.com/quilibriumnetwork/ceremonyclient
 
 # 进入ceremonyclient/node目录
 cd ceremonyclient/node 
+git switch release
 
 # 赋予执行权限
 chmod +x release_autorun.sh
