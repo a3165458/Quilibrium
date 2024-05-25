@@ -78,10 +78,10 @@ git clone https://github.com/quilibriumnetwork/ceremonyclient
 cd ceremonyclient/node 
 
 # 赋予执行权限
-chmod +x poor_mans_cd.sh
+chmod +x release_autorun.sh
 
 # 创建一个screen会话并运行命令
-screen -dmS Quili bash -c './poor_mans_cd.sh'
+screen -dmS Quili bash -c './release_autorun.sh'
 
 }
 
