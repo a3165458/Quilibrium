@@ -234,10 +234,9 @@ function main_menu() {
     echo "6. 设置快捷键的功能"    
     echo "=======================单独使用功能============================="
     echo "7. 独立启动挖矿（安装好常规节点后搭配使用）"
-    echo "8. 下载快照（直接到达43万高度）"
     echo "=========================备份功能================================"
-    echo "9. 备份文件"
-    read -p "请输入选项（1-9）: " OPTION
+    echo "8. 备份文件"
+    read -p "请输入选项（1-8）: " OPTION
 
     case $OPTION in
     1) install_node ;;
@@ -247,8 +246,7 @@ function main_menu() {
     5) check_ceremonyclient_service_status ;; 
     6) check_and_set_alias ;;  
     7) run_node ;;
-    8) add_snapshots ;;
-    9) backup_set ;;
+    8) backup_set ;;
     *) echo "无效选项。" ;;
     esac
 }
