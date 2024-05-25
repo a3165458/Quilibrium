@@ -190,7 +190,7 @@ function check_service_status() {
 
 # 独立启动
 function run_node() {
-    screen -dmS Quili bash -c 'source /root/.gvm/scripts/gvm && gvm use go1.20.2 && cd ~/ceremonyclient/node && ./poor_mans_cd.sh'
+    screen -dmS Quili bash -c 'source /root/.gvm/scripts/gvm && gvm use go1.20.2 && cd ~/ceremonyclient/node && ./release_autorun.sh'
 
     echo "=======================已启动quilibrium 挖矿 ========================================="
 }
@@ -203,7 +203,7 @@ rm -rf store
 cd ~
 mv store ~/ceremonyclient/node/.config
 
-screen -dmS Quili bash -c 'source /root/.gvm/scripts/gvm && gvm use go1.20.2 && cd ~/ceremonyclient/node && ./poor_mans_cd.sh'
+screen -dmS Quili bash -c 'source /root/.gvm/scripts/gvm && gvm use go1.20.2 && cd ~/ceremonyclient/node && ./release_autorun.sh'
    
 }
 
