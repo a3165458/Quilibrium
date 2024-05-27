@@ -82,6 +82,7 @@ sudo cp $HOME/ceremonyclient/client/qclient /usr/local/bin
 # 进入ceremonyclient/node目录
 cd #HOME
 cd ceremonyclient/node 
+git switch release
 
 # 赋予执行权限
 chmod +x release_autorun.sh
