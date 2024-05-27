@@ -74,7 +74,13 @@ gvm use go1.20.2
 # 克隆仓库
 git clone https://github.com/quilibriumnetwork/ceremonyclient
 
+# 构建Qclient
+cd ceremonyclient/client
+GOEXPERIMENT=arenas go build -o qclient main.go
+sudo cp $HOME/ceremonyclient/client/qclient /usr/local/bin
+
 # 进入ceremonyclient/node目录
+cd #HOME
 cd ceremonyclient/node 
 git switch release
 
@@ -83,6 +89,8 @@ chmod +x release_autorun.sh
 
 # 创建一个screen会话并运行命令
 screen -dmS Quili bash -c './release_autorun.sh'
+
+echo ====================================== 安装完成 =========================================
 
 }
 
@@ -217,6 +225,10 @@ echo "=======================备份完成，请执行cd ~/backup 查看备份文
 
 }
 
+function check_balance() {
+qclient token balance
+
+}
 
 # 主菜单
 function main_menu() {
@@ -236,6 +248,8 @@ function main_menu() {
     echo "7. 独立启动挖矿（安装好常规节点后搭配使用）"
     echo "=========================备份功能================================"
     echo "8. 备份文件"
+    echo "=========================收米查询================================"
+    echo "9. 查询余额"
     read -p "请输入选项（1-8）: " OPTION
 
     case $OPTION in
@@ -247,6 +261,7 @@ function main_menu() {
     6) check_and_set_alias ;;  
     7) run_node ;;
     8) backup_set ;;
+    9) check_balance ;;
     *) echo "无效选项。" ;;
     esac
 }
