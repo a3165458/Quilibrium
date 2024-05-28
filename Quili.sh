@@ -192,7 +192,7 @@ function check_service_status() {
 function run_node() {
     screen -dmS Quili bash -c 'source /root/.gvm/scripts/gvm && gvm use go1.20.2 && cd ~/ceremonyclient/node && ./release_autorun.sh'
 
-    echo "=======================已启动quilibrium 挖矿 ========================================="
+    echo "=======================已启动quilibrium 挖矿 请使用screen 命令查询状态========================================="
 }
 
 function add_snapshots() {
