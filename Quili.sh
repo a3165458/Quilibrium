@@ -99,7 +99,7 @@ GOEXPERIMENT=arenas go build -o qclient main.go
 sudo cp $HOME/ceremonyclient/client/qclient /usr/local/bin
 
 # 进入ceremonyclient/node目录
-cd #HOME
+cd $HOME
 cd ceremonyclient/node 
 git switch release
 
@@ -161,14 +161,8 @@ fi
 # 克隆仓库
 git clone https://github.com/quilibriumnetwork/ceremonyclient
 
-
-# 构建 Qclient
-cd ceremonyclient/client
-GOEXPERIMENT=arenas go build -o qclient main.go
-sudo cp $HOME/ceremonyclient/client/qclient /usr/local/bin
-
 # 进入 ceremonyclient/node 目录
-cd #HOME
+cd $HOME
 cd ceremonyclient/node
 git switch release
 
@@ -177,6 +171,13 @@ chmod +x release_autorun.sh
 
 # 创建一个 screen 会话并运行命令
 screen -dmS Quili bash -c './release_autorun.sh'
+
+
+# 构建 Qclient
+cd ceremonyclient/client
+GOEXPERIMENT=arenas go build -o qclient main.go
+sudo cp $HOME/ceremonyclient/client/qclient /usr/local/bin
+
 
 echo ====================================== 安装完成 =========================================
 
