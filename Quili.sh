@@ -91,7 +91,7 @@ else
 fi
 
 # 克隆仓库
-git clone https://github.com/quilibriumnetwork/ceremonyclient
+git clone https://source.quilibrium.com/quilibrium/ceremonyclient.git
 
 # 构建Qclient
 cd ceremonyclient/client
@@ -159,7 +159,7 @@ else
 fi
 
 # 克隆仓库
-git clone https://github.com/quilibriumnetwork/ceremonyclient
+git clone https://source.quilibrium.com/quilibrium/ceremonyclient.git
 
 # 进入 ceremonyclient/node 目录
 cd $HOME
