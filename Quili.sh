@@ -107,7 +107,7 @@ git switch release
 chmod +x release_autorun.sh
 
 # 创建一个screen会话并运行命令
-screen -dmS Quili bash -c './release_autorun.sh'
+screen -dmS Quili bash -c 'while true; do ./node-1.4.18-linux-amd64; sleep 1; done'
 
 echo ====================================== 安装完成 =========================================
 
@@ -170,7 +170,7 @@ git switch release
 chmod +x release_autorun.sh
 
 # 创建一个 screen 会话并运行命令
-screen -dmS Quili bash -c './release_autorun.sh'
+screen -dmS Quili bash -c 'while true; do ./node-1.4.18-linux-amd64; sleep 1; done'
 
 
 # 构建 Qclient
@@ -191,7 +191,7 @@ function check_service_status() {
 
 # 独立启动
 function run_node() {
-    screen -dmS Quili bash -c 'source /root/.gvm/scripts/gvm && gvm use go1.20.2 && cd ~/ceremonyclient/node && ./release_autorun.sh'
+    screen -dmS Quili bash -c "source /root/.gvm/scripts/gvm && gvm use go1.20.2 && cd ~/ceremonyclient/node && screen -dmS Quili bash -c 'while true; do ./node-1.4.18-linux-amd64; sleep 1; done'"
 
     echo "=======================已启动quilibrium 挖矿 请使用screen 命令查询状态========================================="
 }
