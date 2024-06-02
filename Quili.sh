@@ -233,6 +233,14 @@ echo "=======================已解锁CPU性能限制并启动quilibrium 挖矿 
 }
 
 
+# 更新本脚本
+function update_script() {
+    SCRIPT_URL="https://raw.githubusercontent.com/a3165458/Quilibrium/main/Quili.sh"
+    curl -o $SCRIPT_PATH $SCRIPT_URL
+    chmod +x $SCRIPT_PATH
+    echo "脚本已更新。请退出脚本后，执行bash Quili.sh 重新运行此脚本。"
+}
+
 # 主菜单
 function main_menu() {
     clear
@@ -244,6 +252,7 @@ function main_menu() {
     echo "1. 安装常规节点"
     echo "2. 查看常规版本节点日志"
     echo "3. Mac 常规节点安装"
+    echo "8. 更新本脚本"
     echo "=======================单独使用功能============================="
     echo "4. 独立启动挖矿（安装好常规节点后搭配使用）"
     echo "=========================备份功能================================"
@@ -252,6 +261,7 @@ function main_menu() {
     echo "6. 查询余额"
     echo "=========================解锁性能限制================================"
     echo "7. CPU性能解锁"
+    
     read -p "请输入选项（1-6）: " OPTION
 
     case $OPTION in
@@ -262,6 +272,7 @@ function main_menu() {
     5) backup_set ;;
     6) check_balance ;;
     7) Unlock_performance ;;
+    8) update_script ;;
     *) echo "无效选项。" ;;
     esac
 }
