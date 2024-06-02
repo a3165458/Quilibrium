@@ -90,14 +90,6 @@ else
   exit 1
 fi
 
-# 克隆仓库
-git clone https://source.quilibrium.com/quilibrium/ceremonyclient.git
-
-# 构建Qclient
-cd ceremonyclient/client
-GOEXPERIMENT=arenas go build -o qclient main.go
-sudo cp $HOME/ceremonyclient/client/qclient /usr/local/bin
-
 # 进入ceremonyclient/node目录
 cd $HOME
 cd ceremonyclient/node 
@@ -218,6 +210,10 @@ echo "=======================备份完成，请执行cd ~/backup 查看备份文
 }
 
 function check_balance() {
+cd ceremonyclient/client
+GOEXPERIMENT=arenas go build -o qclient main.go
+sudo cp $HOME/ceremonyclient/client/qclient /usr/local/bin
+
 qclient token balance
 
 }
