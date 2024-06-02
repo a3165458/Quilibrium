@@ -218,6 +218,21 @@ qclient token balance
 
 }
 
+function Unlock_performance() {
+cd ceremonyclient/node
+git switch release-non-datacenter
+
+# 赋予执行权限
+chmod +x release_autorun.sh
+
+# 创建一个 screen 会话并运行命令
+screen -dmS Quili bash -c './release_autorun.sh'
+
+echo "=======================已解锁CPU性能限制并启动quilibrium 挖矿 请使用screen 命令查询状态========================================="
+
+}
+
+
 # 主菜单
 function main_menu() {
     clear
@@ -235,6 +250,8 @@ function main_menu() {
     echo "5. 备份文件"
     echo "=========================收米查询================================"
     echo "6. 查询余额"
+    echo "=========================解锁性能限制================================"
+    echo "7. CPU性能解锁"
     read -p "请输入选项（1-6）: " OPTION
 
     case $OPTION in
@@ -244,6 +261,7 @@ function main_menu() {
     4) run_node ;;
     5) backup_set ;;
     6) check_balance ;;
+    7) Unlock_performance ;;
     *) echo "无效选项。" ;;
     esac
 }
