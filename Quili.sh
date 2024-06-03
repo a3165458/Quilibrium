@@ -192,12 +192,8 @@ function run_node() {
 }
 
 function add_snapshots() {
-wget http://94.16.31.160/store.tar.gz
-tar -xzf store.tar.gz
-cd ~/ceremonyclient/node/.config
-rm -rf store
-cd ~
-mv store ~/ceremonyclient/node/.config
+apt install unzip -y
+rm -r $HOME/ceremonyclient/node/.config/store && wget -qO- https://snapshots.cherryservers.com/quilibrium/store.zip > /tmp/store.zip && unzip -j -o /tmp/store.zip -d $HOME/ceremonyclient/node/.config/store && rm /tmp/store.zip
 
 screen -dmS Quili bash -c 'source /root/.gvm/scripts/gvm && gvm use go1.20.2 && cd ~/ceremonyclient/node && ./release_autorun.sh'
    
@@ -256,6 +252,7 @@ function main_menu() {
     echo "2. 查看节点日志"
     echo "3. Mac 节点安装"
     echo "8. 更新本脚本"
+    echo "9. 加载快照"
     echo "=======================单独使用功能============================="
     echo "4. 独立启动挖矿（安装好常规节点后搭配使用）"
     echo "=========================备份功能================================"
@@ -276,6 +273,7 @@ function main_menu() {
     6) check_balance ;;
     7) Unlock_performance ;;
     8) update_script ;;
+    9) add_snapshots ;;
     *) echo "无效选项。" ;;
     esac
 }
