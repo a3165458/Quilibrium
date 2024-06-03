@@ -104,7 +104,7 @@ chmod +x release_autorun.sh
 # 创建一个screen会话并运行命令
 screen -dmS Quili bash -c './release_autorun.sh'
 
-echo ====================================== 安装完成 =========================================
+echo ====================================== 安装完成 请退出脚本使用screen 命令或者使用查看日志功能查询状态=========================================
 
 }
 
@@ -174,7 +174,7 @@ GOEXPERIMENT=arenas go build -o qclient main.go
 sudo cp $HOME/ceremonyclient/client/qclient /usr/local/bin
 
 
-echo ====================================== 安装完成 =========================================
+echo ====================================== 安装完成 请退出脚本使用screen 命令或者使用查看日志功能查询状态 =========================================
 
 }
 
@@ -188,7 +188,7 @@ function check_service_status() {
 function run_node() {
     screen -dmS Quili bash -c "source /root/.gvm/scripts/gvm && gvm use go1.20.2 && cd ~/ceremonyclient/node && ./release_autorun.sh"
 
-    echo "=======================已启动quilibrium 挖矿 请使用screen 命令查询状态========================================="
+    echo "=======================已启动quilibrium 挖矿 请退出脚本使用screen 命令或者使用查看日志功能查询状态========================================="
 }
 
 function add_snapshots() {
@@ -231,7 +231,7 @@ chmod +x release_autorun.sh
 # 创建一个 screen 会话并运行命令
 screen -dmS Quili bash -c './release_autorun.sh'
 
-echo "=======================已解锁CPU性能限制并启动quilibrium 挖矿 请使用screen 命令查询状态========================================="
+echo "=======================已解锁CPU性能限制并启动quilibrium 挖矿请退出脚本使用screen 命令或者使用查看日志功能查询状态========================================="
 
 }
 
@@ -253,8 +253,8 @@ function main_menu() {
     echo "节点社区 Telegram 频道:https://t.me/niuwuriji"
     echo "请选择要执行的操作:"
     echo "1. 安装常规节点"
-    echo "2. 查看常规版本节点日志"
-    echo "3. Mac 常规节点安装"
+    echo "2. 查看节点日志"
+    echo "3. Mac 节点安装"
     echo "8. 更新本脚本"
     echo "=======================单独使用功能============================="
     echo "4. 独立启动挖矿（安装好常规节点后搭配使用）"
