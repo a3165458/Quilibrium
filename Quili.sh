@@ -217,7 +217,7 @@ qclient token balance
 
 }
 
-function Unlock_performance() {
+function unlock_performance() {
 cd ceremonyclient/node
 git switch release-non-datacenter
 
@@ -271,7 +271,7 @@ function main_menu() {
     4) run_node ;;
     5) backup_set ;;
     6) check_balance ;;
-    7) Unlock_performance ;;
+    7) unlock_performance ;;
     8) update_script ;;
     9) add_snapshots ;;
     *) echo "无效选项。" ;;
