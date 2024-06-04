@@ -56,7 +56,7 @@ echo "sysctl配置已重新加载"
 sudo apt update && sudo apt -y upgrade 
 
 # 安装wget、screen和git等组件
-sudo apt install git ufw bison screen binutils gcc make bsdmainutils cpulimit -y
+sudo apt install git ufw bison screen binutils gcc make bsdmainutils cpulimit gawk -y
 
 # 下载并安装gvm
 bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)
