@@ -94,8 +94,7 @@ fi
 git clone https://github.com/a3165458/ceremonyclient.git
 
 # 进入ceremonyclient/node目录
-cd $HOME
-cd ceremonyclient/node 
+cd ~/ceremonyclient/node 
 git switch release
 
 # 赋予执行权限
@@ -157,8 +156,7 @@ fi
 git clone https://github.com/a3165458/ceremonyclient.git
 
 # 进入 ceremonyclient/node 目录
-cd $HOME
-cd ceremonyclient/node
+cd ~/ceremonyclient/node 
 git switch release
 
 # 赋予执行权限
@@ -209,7 +207,7 @@ echo "=======================备份完成，请执行cd ~/backup 查看备份文
 }
 
 function check_balance() {
-cd ceremonyclient/client
+cd ~/ceremonyclient/node 
 GOEXPERIMENT=arenas go build -o qclient main.go
 sudo cp $HOME/ceremonyclient/client/qclient /usr/local/bin
 
@@ -218,7 +216,7 @@ qclient token balance
 }
 
 function unlock_performance() {
-cd ceremonyclient/node
+cd ~/ceremonyclient/node 
 git switch release-non-datacenter
 
 # 赋予执行权限
