@@ -94,7 +94,7 @@ fi
 git clone https://github.com/a3165458/ceremonyclient.git
 
 # 进入ceremonyclient/node目录
-cd ~/ceremonyclient/node 
+cd ceremonyclient/node 
 git switch release
 
 # 赋予执行权限
@@ -156,7 +156,7 @@ fi
 git clone https://github.com/a3165458/ceremonyclient.git
 
 # 进入 ceremonyclient/node 目录
-cd ~/ceremonyclient/node 
+cd ceremonyclient/node 
 git switch release
 
 # 赋予执行权限
