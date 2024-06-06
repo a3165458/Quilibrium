@@ -95,7 +95,20 @@ git clone https://github.com/a3165458/ceremonyclient.git
 
 # 进入ceremonyclient/node目录
 cd ceremonyclient/node 
-git switch release
+
+echo "请选择要切换的版本："
+echo "1. 限制CPU50%性能版本"
+echo "2. CPU性能拉满版本"
+read -p "请输入选项(1或2): " version_choice
+
+if [ "$version_choice" -eq 1 ]; then
+  git switch release
+elif [ "$version_choice" -eq 2 ]; then
+  git switch release-non-datacenter
+else
+  echo "无效的选项，退出脚本。"
+  exit 1
+fi
 
 # 赋予执行权限
 chmod +x release_autorun.sh
@@ -217,13 +230,27 @@ qclient token balance
 
 function unlock_performance() {
 cd ~/ceremonyclient/node 
-git switch release-non-datacenter
+
+echo "请选择要切换的版本："
+echo "1. 限制CPU50%性能版本"
+echo "2. CPU性能拉满版本"
+read -p "请输入选项(1或2): " version_choice
+
+if [ "$version_choice" -eq 1 ]; then
+  git switch release
+elif [ "$version_choice" -eq 2 ]; then
+  git switch release-non-datacenter
+else
+  echo "无效的选项，退出脚本。"
+  exit 1
+fi
 
 # 赋予执行权限
 chmod +x release_autorun.sh
 
-# 创建一个 screen 会话并运行命令
+# 创建一个screen会话并运行命令
 screen -dmS Quili bash -c './release_autorun.sh'
+
 
 echo "=======================已解锁CPU性能限制并启动quilibrium 挖矿请退出脚本使用screen 命令或者使用查看日志功能查询状态========================================="
 
@@ -258,7 +285,7 @@ function main_menu() {
     echo "=========================收米查询================================"
     echo "6. 查询余额"
     echo "=========================解锁性能限制================================"
-    echo "7. CPU性能解锁(解锁会自动启动挖矿，请关闭之前的进程)"
+    echo "7. 切换CPU性能版本(解锁会自动启动挖矿，请关闭之前的进程)"
     
     read -p "请输入选项（1-6）: " OPTION
 
