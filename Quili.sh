@@ -91,24 +91,13 @@ else
 fi
 
 
-git clone https://github.com/a3165458/ceremonyclient.git
+git clone https://source.quilibrium.com/quilibrium/ceremonyclient.git
 
 # 进入ceremonyclient/node目录
 cd ceremonyclient/node 
 
-echo "请选择要切换的版本："
-echo "1. 限制CPU50%性能版本"
-echo "2. CPU性能拉满版本"
-read -p "请输入选项(1或2): " version_choice
+git switch release-cdn
 
-if [ "$version_choice" -eq 1 ]; then
-  git switch release-cdn
-elif [ "$version_choice" -eq 2 ]; then
-  git switch release-non-datacenter
-else
-  echo "无效的选项，退出脚本。"
-  exit 1
-fi
 
 # 赋予执行权限
 chmod +x release_autorun.sh
@@ -166,7 +155,7 @@ else
 fi
 
 # 克隆仓库
-git clone https://github.com/a3165458/ceremonyclient.git
+git clone https://source.quilibrium.com/quilibrium/ceremonyclient.git
 
 # 进入 ceremonyclient/node 目录
 cd ceremonyclient/node 
@@ -177,12 +166,6 @@ chmod +x release_autorun.sh
 
 # 创建一个 screen 会话并运行命令
 screen -dmS Quili bash -c './release_autorun.sh'
-
-
-# 构建 Qclient
-cd ceremonyclient/client
-GOEXPERIMENT=arenas go build -o qclient main.go
-sudo cp $HOME/ceremonyclient/client/qclient /usr/local/bin
 
 
 echo ====================================== 安装完成 请退出脚本使用screen 命令或者使用查看日志功能查询状态 =========================================
@@ -284,8 +267,6 @@ function main_menu() {
     echo "5. 备份文件"
     echo "=========================收米查询================================"
     echo "6. 查询余额"
-    echo "=========================解锁性能限制================================"
-    echo "7. 切换CPU性能版本(解锁会自动启动挖矿，请关闭之前的进程)"
     
     read -p "请输入选项（1-6）: " OPTION
 
@@ -296,7 +277,6 @@ function main_menu() {
     4) run_node ;;
     5) backup_set ;;
     6) check_balance ;;
-    7) unlock_performance ;;
     8) update_script ;;
     9) add_snapshots ;;
     *) echo "无效选项。" ;;
