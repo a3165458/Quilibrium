@@ -91,7 +91,7 @@ else
 fi
 
 
-git clone https://github.com/a3165458/ceremonyclient.git
+git clone https://source.quilibrium.com/quilibrium/ceremonyclient.git
 
 # 进入ceremonyclient/node目录
 cd ceremonyclient/node 
@@ -155,7 +155,7 @@ else
 fi
 
 # 克隆仓库
-git clone https://github.com/a3165458/ceremonyclient.git
+git clone https://source.quilibrium.com/quilibrium/ceremonyclient.git
 
 # 进入 ceremonyclient/node 目录
 cd ceremonyclient/node 
@@ -243,7 +243,7 @@ echo "=======================已解锁CPU性能限制并启动quilibrium 挖矿�
 # 更新本脚本
 function update_node() {
     cd ~/ceremonyclient/node
-    git remote set-url origin https://github.com/a3165458/ceremonyclient.git
+    git remote set-url origin https://source.quilibrium.com/quilibrium/ceremonyclient.git
     git pull
     git switch release-cdn
     echo "节点已升级。请运行脚本独立启动挖矿功能启动节点。"
