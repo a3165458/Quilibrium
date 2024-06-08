@@ -266,6 +266,84 @@ function update_script() {
     echo "脚本已更新。请退出脚本后，执行bash Quili.sh 重新运行此脚本。"
 }
 
+function install_node_contabo() {
+
+
+# 增加swap空间
+sudo mkdir /swap
+sudo fallocate -l 24G /swap/swapfile
+sudo chmod 600 /swap/swapfile
+sudo mkswap /swap/swapfile
+sudo swapon /swap/swapfile
+echo '/swap/swapfile swap swap defaults 0 0' >> /etc/fstab
+
+# 向/etc/sysctl.conf文件追加内容
+echo -e "\n# 自定义最大接收和发送缓冲区大小" >> /etc/sysctl.conf
+echo "net.core.rmem_max=600000000" >> /etc/sysctl.conf
+echo "net.core.wmem_max=600000000" >> /etc/sysctl.conf
+
+echo "配置已添加到/etc/sysctl.conf"
+
+# 重新加载sysctl配置以应用更改
+sysctl -p
+
+echo "sysctl配置已重新加载"
+
+sudo sh -c 'echo "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /etc/resolv.conf'
+
+# 更新并升级Ubuntu软件包
+sudo apt update && sudo apt -y upgrade 
+
+# 安装wget、screen和git等组件
+sudo apt install git ufw bison screen binutils gcc make bsdmainutils cpulimit gawk -y
+
+# 下载并安装gvm
+bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)
+source /root/.gvm/scripts/gvm
+
+# 获取系统架构
+ARCH=$(uname -m)
+
+# 安装并使用go1.4作为bootstrap
+gvm install go1.4 -B
+gvm use go1.4
+export GOROOT_BOOTSTRAP=$GOROOT
+
+# 根据系统架构安装相应的Go版本
+if [ "$ARCH" = "x86_64" ]; then
+  gvm install go1.17.13
+  gvm use go1.17.13
+  export GOROOT_BOOTSTRAP=$GOROOT
+
+  gvm install go1.20.2
+  gvm use go1.20.2
+elif [ "$ARCH" = "aarch64" ]; then
+  gvm install go1.17.13 -B
+  gvm use go1.17.13
+  export GOROOT_BOOTSTRAP=$GOROOT
+
+  gvm install go1.20.2 -B
+  gvm use go1.20.2
+else
+  echo "Unsupported architecture: $ARCH"
+  exit 1
+fi
+
+
+git clone https://source.quilibrium.com/quilibrium/ceremonyclient.git
+
+# 进入ceremonyclient/node目录
+cd ceremonyclient/node 
+
+git switch release-cdn
+
+
+# 赋予执行权限
+chmod +x release_autorun.sh
+
+# 创建一个screen会话并运行命令
+screen -dmS Quili bash -c './release_autorun.sh'
+
 # 主菜单
 function main_menu() {
     clear
@@ -280,7 +358,8 @@ function main_menu() {
     echo "8. 更新本脚本"
     echo "9. 加载快照"
     echo "10. 升级节点程序版本"
-    echo "11. 升级节点程序版本(针对contabo)"
+    echo "11. 安装常规节点(针对contabo)"
+    echo "12. 升级节点程序版本(针对contabo)"
     echo "=======================单独使用功能============================="
     echo "4. 独立启动挖矿（安装好常规节点后搭配使用）"
     echo "=========================备份功能================================"
@@ -300,7 +379,8 @@ function main_menu() {
     8) update_script ;;
     9) add_snapshots ;;
     10) update_node ;;
-    11) update_node_contabo ;;
+    11) install_node_contabo ;;
+    12) update_node_contabo ;;
     *) echo "无效选项。" ;;
     esac
 }
