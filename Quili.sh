@@ -240,7 +240,7 @@ echo "=======================已解锁CPU性能限制并启动quilibrium 挖矿�
 }
 
 
-# 更新本脚本
+# 升级节点版本
 function update_node() {
     cd ~/ceremonyclient/node
     git remote set-url origin https://source.quilibrium.com/quilibrium/ceremonyclient.git
@@ -249,7 +249,16 @@ function update_node() {
     echo "节点已升级。请运行脚本独立启动挖矿功能启动节点。"
 }
 
-# 升级节点版本
+function update_node_contabo() {
+    sudo sh -c 'echo "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /etc/resolv.conf'
+    cd ~/ceremonyclient/node
+    git remote set-url origin https://source.quilibrium.com/quilibrium/ceremonyclient.git
+    git pull
+    git switch release-cdn
+    echo "节点已升级。请运行脚本独立启动挖矿功能启动节点。"
+}
+
+# 更新本脚本
 function update_script() {
     SCRIPT_URL="https://raw.githubusercontent.com/a3165458/Quilibrium/main/Quili.sh"
     curl -o $SCRIPT_PATH $SCRIPT_URL
@@ -271,6 +280,7 @@ function main_menu() {
     echo "8. 更新本脚本"
     echo "9. 加载快照"
     echo "10. 升级节点程序版本"
+    echo "11. 升级节点程序版本(针对contabo)"
     echo "=======================单独使用功能============================="
     echo "4. 独立启动挖矿（安装好常规节点后搭配使用）"
     echo "=========================备份功能================================"
@@ -290,6 +300,7 @@ function main_menu() {
     8) update_script ;;
     9) add_snapshots ;;
     10) update_node ;;
+    11) update_node_contabo ;;
     *) echo "无效选项。" ;;
     esac
 }
