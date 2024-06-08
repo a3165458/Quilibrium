@@ -241,6 +241,15 @@ echo "=======================已解锁CPU性能限制并启动quilibrium 挖矿�
 
 
 # 更新本脚本
+function update_node() {
+    cd ~/ceremonyclient/node
+    git remote set-url origin https://github.com/a3165458/ceremonyclient.git
+    git pull
+    git switch release-cdn
+    echo "节点已升级。请运行脚本独立启动挖矿功能启动节点。"
+}
+
+# 升级节点版本
 function update_script() {
     SCRIPT_URL="https://raw.githubusercontent.com/a3165458/Quilibrium/main/Quili.sh"
     curl -o $SCRIPT_PATH $SCRIPT_URL
@@ -261,6 +270,7 @@ function main_menu() {
     echo "3. Mac 节点安装"
     echo "8. 更新本脚本"
     echo "9. 加载快照"
+    echo "10. 升级节点程序版本"
     echo "=======================单独使用功能============================="
     echo "4. 独立启动挖矿（安装好常规节点后搭配使用）"
     echo "=========================备份功能================================"
@@ -268,7 +278,7 @@ function main_menu() {
     echo "=========================收米查询================================"
     echo "6. 查询余额"
     
-    read -p "请输入选项（1-9）: " OPTION
+    read -p "请输入选项（1-10）: " OPTION
 
     case $OPTION in
     1) install_node ;;
@@ -279,6 +289,7 @@ function main_menu() {
     6) check_balance ;;
     8) update_script ;;
     9) add_snapshots ;;
+    10) update_node ;;
     *) echo "无效选项。" ;;
     esac
 }
