@@ -344,6 +344,8 @@ chmod +x release_autorun.sh
 # 创建一个screen会话并运行命令
 screen -dmS Quili bash -c './release_autorun.sh'
 
+}
+
 # 主菜单
 function main_menu() {
     clear
