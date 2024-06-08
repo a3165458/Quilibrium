@@ -367,7 +367,7 @@ function main_menu() {
     echo "=========================收米查询================================"
     echo "6. 查询余额"
     
-    read -p "请输入选项（1-10）: " OPTION
+    read -p "请输入选项（1-12）: " OPTION
 
     case $OPTION in
     1) install_node ;;
