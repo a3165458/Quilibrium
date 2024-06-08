@@ -102,7 +102,7 @@ echo "2. CPU性能拉满版本"
 read -p "请输入选项(1或2): " version_choice
 
 if [ "$version_choice" -eq 1 ]; then
-  git switch release
+  git switch release-cdn
 elif [ "$version_choice" -eq 2 ]; then
   git switch release-non-datacenter
 else
@@ -170,7 +170,7 @@ git clone https://github.com/a3165458/ceremonyclient.git
 
 # 进入 ceremonyclient/node 目录
 cd ceremonyclient/node 
-git switch release
+git switch release-cdn
 
 # 赋予执行权限
 chmod +x release_autorun.sh
@@ -237,7 +237,7 @@ echo "2. CPU性能拉满版本"
 read -p "请输入选项(1或2): " version_choice
 
 if [ "$version_choice" -eq 1 ]; then
-  git switch release
+  git switch release-cdn
 elif [ "$version_choice" -eq 2 ]; then
   git switch release-non-datacenter
 else
