@@ -203,11 +203,23 @@ echo "=======================备份完成，请执行cd ~/backup 查看备份文
 }
 
 function check_balance() {
-cd ~/ceremonyclient/node 
-GOEXPERIMENT=arenas go build -o qclient main.go
-sudo cp $HOME/ceremonyclient/client/qclient /usr/local/bin
+cd ~/ceremonyclient/node
+version="1.4.19"
+binary="node-$version"
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    if [[ $(uname -m) == "aarch64"* ]]; then
+        binary="$binary-linux-arm64"
+    else
+        binary="$binary-linux-amd64"
+    fi
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    binary="$binary-darwin-arm64"
+else
+    echo "unsupported OS for releases, please build from source"
+    exit 1
+fi
 
-qclient token balance
+./$binary --node-info
 
 }
 
@@ -346,6 +358,13 @@ screen -dmS Quili bash -c './release_autorun.sh'
 
 }
 
+function setup_grpc() {
+    wget --no-cache -O - https://raw.githubusercontent.com/lamat1111/quilibriumscripts/master/tools/qnode_gRPC_calls_setup.sh | bash
+
+    echo "gRPC 安装后，等待约30分钟生效"
+}
+
+
 # 主菜单
 function main_menu() {
     clear
@@ -362,12 +381,13 @@ function main_menu() {
     echo "10. 升级节点程序版本"
     echo "11. 安装常规节点(针对contabo)"
     echo "12. 升级节点程序版本(针对contabo)"
+    echo "13. 安装grpc"
     echo "=======================单独使用功能============================="
     echo "4. 独立启动挖矿（安装好常规节点后搭配使用）"
     echo "=========================备份功能================================"
     echo "5. 备份文件"
     echo "=========================收米查询================================"
-    echo "6. 查询余额"
+    echo "6. 查询余额(需要先安装grpc)"
     
     read -p "请输入选项（1-12）: " OPTION
 
@@ -383,6 +403,7 @@ function main_menu() {
     10) update_node ;;
     11) install_node_contabo ;;
     12) update_node_contabo ;;
+    13) setup_grpc ;;
     *) echo "无效选项。" ;;
     esac
 }
