@@ -389,7 +389,7 @@ function main_menu() {
     echo "=========================收米查询================================"
     echo "6. 查询余额(需要先安装grpc)"
     
-    read -p "请输入选项（1-12）: " OPTION
+    read -p "请输入选项（1-13）: " OPTION
 
     case $OPTION in
     1) install_node ;;
