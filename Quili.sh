@@ -272,10 +272,21 @@ function update_node_contabo() {
 
 # 更新本脚本
 function update_script() {
+    SCRIPT_PATH="./Quili.sh"  # 定义脚本路径
     SCRIPT_URL="https://raw.githubusercontent.com/a3165458/Quilibrium/main/Quili.sh"
-    curl -o $SCRIPT_PATH $SCRIPT_URL
-    chmod +x $SCRIPT_PATH
-    echo "脚本已更新。请退出脚本后，执行bash Quili.sh 重新运行此脚本。"
+    
+    # 备份原始脚本
+    cp $SCRIPT_PATH "${SCRIPT_PATH}.bak"
+    
+    # 下载新脚本并检查是否成功
+    if curl -o $SCRIPT_PATH $SCRIPT_URL; then
+        chmod +x $SCRIPT_PATH
+        echo "脚本已更新。请退出脚本后，执行bash Quli.sh 重新运行此脚本。"
+    else
+        echo "更新失败。正在恢复原始脚本。"
+        mv "${SCRIPT_PATH}.bak" $SCRIPT_PATH
+    fi
+
 }
 
 function install_node_contabo() {
