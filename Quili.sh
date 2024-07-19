@@ -112,64 +112,89 @@ echo ====================================== 安装完成 请退出脚本使用sc
 
 # 节点安装功能
 function install_node_mac() {
-# 安装 Homebrew 包管理器（如果尚未安装）
-if ! command -v brew &> /dev/null; then
-    echo "Homebrew 未安装。正在安装 Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-fi
+    # 检查是否在 macOS 上运行
+    if [[ "$OSTYPE" != "darwin"* ]]; then
+        echo "此功能仅适用于 macOS。请使用适合您操作系统的安装方法。"
+        return 1
+    fi
 
-# 更新 Homebrew 并安装必要的软件包
-brew update
-brew install wget git screen bison gcc make
+    # 如果尚未安装,则安装 Xcode 命令行工具
+    if ! xcode-select -p &> /dev/null; then
+        echo "正在安装 Xcode 命令行工具..."
+        xcode-select --install
+        # 等待安装完成
+        while ! xcode-select -p &> /dev/null; do
+            sleep 5
+        done
+    fi
 
-# 安装 gvm
-bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)
-source $HOME/.gvm/scripts/gvm
+    # 如果尚未安装,则安装 Homebrew
+    if ! command -v brew &> /dev/null; then
+        echo "正在安装 Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        # 为当前会话将 Homebrew 添加到 PATH
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    fi
 
-# 获取系统架构
-ARCH=$(uname -m)
+    # 更新 Homebrew 并安装必要的包
+    echo "正在更新 Homebrew 并安装必要的包..."
+    brew update
+    brew install wget git screen bison gcc make
 
-# 安装并使用 go1.4 作为 bootstrap
-gvm install go1.4 -B
-gvm use go1.4
-export GOROOT_BOOTSTRAP=$GOROOT
+    # 安装 gvm (Go 版本管理器)
+    echo "正在安装 gvm..."
+    bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)
+    source $HOME/.gvm/scripts/gvm
 
-# 根据系统架构安装相应的 Go 版本
-if [ "$ARCH" = "x86_64" ]; then
-  gvm install go1.17.13
-  gvm use go1.17.13
-  export GOROOT_BOOTSTRAP=$GOROOT
+    # 获取系统架构
+    ARCH=$(uname -m)
 
-  gvm install go1.20.2
-  gvm use go1.20.2
-elif [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
-  gvm install go1.17.13 -B
-  gvm use go1.17.13
-  export GOROOT_BOOTSTRAP=$GOROOT
+    # 安装并使用 Go 版本
+    echo "正在安装 Go 版本..."
+    gvm install go1.4 -B
+    gvm use go1.4
+    export GOROOT_BOOTSTRAP=$GOROOT
 
-  gvm install go1.20.2 -B
-  gvm use go1.20.2
-else
-  echo "无法支持的版本: $ARCH"
-  exit 1
-fi
+    if [ "$ARCH" = "x86_64" ]; then
+        gvm install go1.17.13
+        gvm use go1.17.13
+        export GOROOT_BOOTSTRAP=$GOROOT
 
-# 克隆仓库
-git clone https://source.quilibrium.com/quilibrium/ceremonyclient.git
+        gvm install go1.20.2
+        gvm use go1.20.2
+    elif [ "$ARCH" = "arm64" ]; then
+        gvm install go1.17.13 -B
+        gvm use go1.17.13
+        export GOROOT_BOOTSTRAP=$GOROOT
 
-# 进入 ceremonyclient/node 目录
-cd ceremonyclient/node 
-git switch release-cdn
+        gvm install go1.20.2 -B
+        gvm use go1.20.2
+    else
+        echo "不支持的架构: $ARCH"
+        return 1
+    fi
 
-# 赋予执行权限
-chmod +x release_autorun.sh
+    # 克隆仓库
+    echo "正在克隆 Quilibrium 仓库..."
+    git clone https://source.quilibrium.com/quilibrium/ceremonyclient.git
 
-# 创建一个 screen 会话并运行命令
-screen -dmS Quili bash -c './release_autorun.sh'
+    # 进入 node 目录并切换到正确的分支
+    cd ceremonyclient/node 
+    git switch release-cdn
 
+    # 设置执行权限
+    chmod +x release_autorun.sh
 
-echo ====================================== 安装完成 请退出脚本使用screen 命令或者使用查看日志功能查询状态 =========================================
+    # 创建一个 screen 会话并运行命令
+    echo "正在 screen 会话中启动节点..."
+    screen -dmS Quili bash -c './release_autorun.sh'
 
+    echo "======================================"
+    echo "安装完成。要查看节点状态:"
+    echo "1. 退出此脚本"
+    echo "2. 运行 'screen -r Quili' 来连接到 screen 会话"
+    echo "3. 使用 Ctrl-A + Ctrl-D 来从 screen 会话中分离"
+    echo "======================================"
 }
 
 # 查看常规版本节点日志
