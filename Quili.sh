@@ -228,7 +228,7 @@ echo "=======================备份完成，请执行cd ~/backup 查看备份文
 
 function check_balance() {
 cd ~/ceremonyclient/node
-version="1.4.21"
+version="1.4.21.1"
 binary="node-$version"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     if [[ $(uname -m) == "aarch64"* ]]; then
