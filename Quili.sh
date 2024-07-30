@@ -220,8 +220,7 @@ screen -dmS Quili bash -c 'source /root/.gvm/scripts/gvm && gvm use go1.20.2 && 
 
 function backup_set() {
 mkdir -p ~/backup
-cat ~/ceremonyclient/node/.config/config.yml > ~/backup/config.txt
-cat ~/ceremonyclient/node/.config/keys.yml > ~/backup/keys.txt
+cp -r ~/ceremonyclient/node/.config ~/backup
 
 echo "=======================备份完成，请执行cd ~/backup 查看备份文件========================================="
 
