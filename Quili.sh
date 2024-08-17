@@ -1,12 +1,5 @@
 #!/bin/bash
 
-# 检查是否以root用户运行脚本
-if [ "$(id -u)" != "0" ]; then
-    echo "此脚本需要以root用户权限运行。"
-    echo "请尝试使用 'sudo -i' 命令切换到root用户，然后再次运行此脚本。"
-    exit 1
-fi
-
 # 脚本保存路径
 SCRIPT_PATH="$HOME/Quili.sh"
 
@@ -109,8 +102,6 @@ echo ====================================== 安装完成 请退出脚本使用sc
 
 }
 
-
-# 节点安装功能
 function install_node_mac() {
     # 检查是否在 macOS 上运行
     if [[ "$OSTYPE" != "darwin"* ]]; then
@@ -188,13 +179,7 @@ function install_node_mac() {
     # 创建一个 screen 会话并运行命令
     echo "正在 screen 会话中启动节点..."
     screen -dmS Quili bash -c './release_autorun.sh'
-
-    echo "======================================"
-    echo "安装完成。要查看节点状态:"
-    echo "1. 退出此脚本"
-    echo "2. 运行 'screen -r Quili' 来连接到 screen 会话"
-    echo "3. 使用 Ctrl-A + Ctrl-D 来从 screen 会话中分离"
-    echo "======================================"
+    
 }
 
 # 查看常规版本节点日志
