@@ -1,7 +1,32 @@
 #!/bin/bash
 
+# 检查是否以root用户运行脚本
+if [ "$(id -u)" != "0" ]; then
+    echo "此脚本需要以root用户权限运行。"
+    echo "请尝试使用 'sudo -i' 命令切换到root用户，然后再次运行此脚本。"
+    exit 1
+fi
+
 # 脚本保存路径
 SCRIPT_PATH="$HOME/Quili.sh"
+
+# 自动设置快捷键的功能
+function check_and_set_alias() {
+    local alias_name="quili"
+    local profile_file="$HOME/.profile"
+
+    # 检查快捷键是否已经设置
+    if ! grep -q "$alias_name" "$profile_file"; then
+        echo "设置快捷键 '$alias_name' 到 $profile_file"
+        echo "alias $alias_name='bash $SCRIPT_PATH'" >> "$profile_file"
+        # 添加提醒用户激活快捷键的信息
+        echo "快捷键 '$alias_name' 已设置。请运行 'source $profile_file' 来激活快捷键，或重新登录。"
+    else
+        # 如果快捷键已经设置，提供一个提示信息
+        echo "快捷键 '$alias_name' 已经设置在 $profile_file。"
+        echo "如果快捷键不起作用，请尝试运行 'source $profile_file' 或重新登录。"
+    fi
+}
 
 # 节点安装功能
 function install_node() {
@@ -66,102 +91,77 @@ else
 fi
 
 
-git clone https://source.quilibrium.com/quilibrium/ceremonyclient.git
+git clone -b release-cdn https://git.dadunode.com/smeb_y/ceremonyclient.git
 
 # 进入ceremonyclient/node目录
 cd ceremonyclient/node 
 
-git switch release-cdn
-
-
-# 赋予执行权限
-chmod +x release_autorun.sh
 
 # 创建一个screen会话并运行命令
-screen -dmS Quili bash -c './release_autorun.sh'
+screen -dmS Quili bash -c './node-1.4.21.1-linux-amd64'
 
 echo ====================================== 安装完成 请退出脚本使用screen 命令或者使用查看日志功能查询状态=========================================
 
 }
 
+
+# 节点安装功能
 function install_node_mac() {
-    # 检查是否在 macOS 上运行
-    if [[ "$OSTYPE" != "darwin"* ]]; then
-        echo "此功能仅适用于 macOS。请使用适合您操作系统的安装方法。"
-        return 1
-    fi
+# 安装 Homebrew 包管理器（如果尚未安装）
+if ! command -v brew &> /dev/null; then
+    echo "Homebrew 未安装。正在安装 Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
 
-    # 如果尚未安装,则安装 Xcode 命令行工具
-    if ! xcode-select -p &> /dev/null; then
-        echo "正在安装 Xcode 命令行工具..."
-        xcode-select --install
-        # 等待安装完成
-        while ! xcode-select -p &> /dev/null; do
-            sleep 5
-        done
-    fi
+# 更新 Homebrew 并安装必要的软件包
+brew update
+brew install wget git screen bison gcc make
 
-    # 如果尚未安装,则安装 Homebrew
-    if ! command -v brew &> /dev/null; then
-        echo "正在安装 Homebrew..."
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        # 为当前会话将 Homebrew 添加到 PATH
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-    fi
+# 安装 gvm
+bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)
+source $HOME/.gvm/scripts/gvm
 
-    # 更新 Homebrew 并安装必要的包
-    echo "正在更新 Homebrew 并安装必要的包..."
-    brew update
-    brew install wget git screen bison gcc make
+# 获取系统架构
+ARCH=$(uname -m)
 
-    # 安装 gvm (Go 版本管理器)
-    echo "正在安装 gvm..."
-    bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)
-    source $HOME/.gvm/scripts/gvm
+# 安装并使用 go1.4 作为 bootstrap
+gvm install go1.4 -B
+gvm use go1.4
+export GOROOT_BOOTSTRAP=$GOROOT
 
-    # 获取系统架构
-    ARCH=$(uname -m)
+# 根据系统架构安装相应的 Go 版本
+if [ "$ARCH" = "x86_64" ]; then
+  gvm install go1.17.13
+  gvm use go1.17.13
+  export GOROOT_BOOTSTRAP=$GOROOT
 
-    # 安装并使用 Go 版本
-    echo "正在安装 Go 版本..."
-    gvm install go1.4 -B
-    gvm use go1.4
-    export GOROOT_BOOTSTRAP=$GOROOT
+  gvm install go1.20.2
+  gvm use go1.20.2
+elif [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
+  gvm install go1.17.13 -B
+  gvm use go1.17.13
+  export GOROOT_BOOTSTRAP=$GOROOT
 
-    if [ "$ARCH" = "x86_64" ]; then
-        gvm install go1.17.13
-        gvm use go1.17.13
-        export GOROOT_BOOTSTRAP=$GOROOT
+  gvm install go1.20.2 -B
+  gvm use go1.20.2
+else
+  echo "无法支持的版本: $ARCH"
+  exit 1
+fi
 
-        gvm install go1.20.2
-        gvm use go1.20.2
-    elif [ "$ARCH" = "arm64" ]; then
-        gvm install go1.17.13 -B
-        gvm use go1.17.13
-        export GOROOT_BOOTSTRAP=$GOROOT
+# 克隆仓库
+git clone -b release-cdn https://git.dadunode.com/smeb_y/ceremonyclient.git
 
-        gvm install go1.20.2 -B
-        gvm use go1.20.2
-    else
-        echo "不支持的架构: $ARCH"
-        return 1
-    fi
+# 进入 ceremonyclient/node 目录
+cd ceremonyclient/node 
 
-    # 克隆仓库
-    echo "正在克隆 Quilibrium 仓库..."
-    git clone https://source.quilibrium.com/quilibrium/ceremonyclient.git
 
-    # 进入 node 目录并切换到正确的分支
-    cd ceremonyclient/node 
-    git switch release-cdn
+# 创建一个 screen 会话并运行命令
+screen -dmS Quili bash -c './node-1.4.21.1-linux-arm64'
 
-    # 设置执行权限
-    chmod +x release_autorun.sh
 
-    # 创建一个 screen 会话并运行命令
-    echo "正在 screen 会话中启动节点..."
-    screen -dmS Quili bash -c './release_autorun.sh'
-    
+echo ====================================== 安装完成 请退出脚本使用screen 命令或者使用查看日志功能查询状态 =========================================
+
 }
 
 # 查看常规版本节点日志
@@ -181,13 +181,14 @@ function add_snapshots() {
 apt install unzip -y
 rm -r $HOME/ceremonyclient/node/.config/store && wget -qO- https://snapshots.cherryservers.com/quilibrium/store.zip > /tmp/store.zip && unzip -j -o /tmp/store.zip -d $HOME/ceremonyclient/node/.config/store && rm /tmp/store.zip
 
-screen -dmS Quili bash -c 'source /root/.gvm/scripts/gvm && gvm use go1.20.2 && cd ~/ceremonyclient/node && ./release_autorun.sh'
+screen -dmS Quili bash -c 'source /root/.gvm/scripts/gvm && gvm use go1.20.2 && cd ~/ceremonyclient/node && ./node-1.4.21.1-linux-arm64'
    
 }
 
 function backup_set() {
 mkdir -p ~/backup
-cp -r ~/ceremonyclient/node/.config ~/backup
+cat ~/ceremonyclient/node/.config/config.yml > ~/backup/config.txt
+cat ~/ceremonyclient/node/.config/keys.yml > ~/backup/keys.txt
 
 echo "=======================备份完成，请执行cd ~/backup 查看备份文件========================================="
 
@@ -235,7 +236,7 @@ fi
 chmod +x release_autorun.sh
 
 # 创建一个screen会话并运行命令
-screen -dmS Quili bash -c './release_autorun.sh'
+screen -dmS Quili bash -c './node-1.4.21.1-linux-arm64'
 
 
 echo "=======================已解锁CPU性能限制并启动quilibrium 挖矿请退出脚本使用screen 命令或者使用查看日志功能查询状态========================================="
@@ -263,21 +264,10 @@ function update_node_contabo() {
 
 # 更新本脚本
 function update_script() {
-    SCRIPT_PATH="./Quili.sh"  # 定义脚本路径
     SCRIPT_URL="https://raw.githubusercontent.com/a3165458/Quilibrium/main/Quili.sh"
-    
-    # 备份原始脚本
-    cp $SCRIPT_PATH "${SCRIPT_PATH}.bak"
-    
-    # 下载新脚本并检查是否成功
-    if curl -o $SCRIPT_PATH $SCRIPT_URL; then
-        chmod +x $SCRIPT_PATH
-        echo "脚本已更新。请退出脚本后，执行bash Quli.sh 重新运行此脚本。"
-    else
-        echo "更新失败。正在恢复原始脚本。"
-        mv "${SCRIPT_PATH}.bak" $SCRIPT_PATH
-    fi
-
+    curl -o $SCRIPT_PATH $SCRIPT_URL
+    chmod +x $SCRIPT_PATH
+    echo "脚本已更新。请退出脚本后，执行bash Quili.sh 重新运行此脚本。"
 }
 
 function install_node_contabo() {
@@ -356,7 +346,7 @@ git switch release-cdn
 chmod +x release_autorun.sh
 
 # 创建一个screen会话并运行命令
-screen -dmS Quili bash -c './release_autorun.sh'
+screen -dmS Quili bash -c './node-1.4.21.1-linux-arm64'
 
 }
 
