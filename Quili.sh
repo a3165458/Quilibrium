@@ -357,10 +357,7 @@ function setup_grpc() {
 }
 
 function update_new() {
-mkdir -p ~/scripts && \
-wget -O ~/scripts/qnode_service_change_autorun_to_bin.sh "https://raw.githubusercontent.com/lamat1111/QuilibriumScripts/main/tools/qnode_service_change_autorun_to_bin.sh" && \
-chmod +x ~/scripts/qnode_service_change_autorun_to_bin.sh && \
-~/scripts/qnode_service_change_autorun_to_bin.sh
+wget --no-cache -O - https://raw.githubusercontent.com/lamat1111/QuilibriumScripts/master/qnode_service_update.sh | bash
 }
 
 # 主菜单
@@ -380,7 +377,7 @@ function main_menu() {
     echo "11. 安装常规节点(针对contabo)"
     echo "12. 升级节点程序版本(针对contabo)"
     echo "13. 安装grpc"
-    echo "14. 升级2.0(截至10.13日，2.0还未正式开始挖矿，请根据实际情况确认呢是否升级)"
+    echo "14. 升级2.0(截至10.24日，2.0已正式开始挖矿，请根据实际情况确认是否升级)"
     echo "=======================单独使用功能============================="
     echo "4. 独立启动挖矿（安装好常规节点后搭配使用）"
     echo "=========================备份功能================================"
