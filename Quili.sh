@@ -357,6 +357,11 @@ function setup_grpc() {
 }
 
 function update_new() {
+mkdir -p ~/scripts && \
+wget -O ~/scripts/qnode_service_change_autorun_to_bin.sh "https://raw.githubusercontent.com/lamat1111/QuilibriumScripts/main/tools/qnode_service_change_autorun_to_bin.sh" && \
+chmod +x ~/scripts/qnode_service_change_autorun_to_bin.sh && \
+~/scripts/qnode_service_change_autorun_to_bin.sh
+
 wget --no-cache -O - https://raw.githubusercontent.com/lamat1111/QuilibriumScripts/master/qnode_service_update.sh | bash
 }
 
