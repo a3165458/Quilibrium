@@ -351,7 +351,7 @@ screen -dmS Quili bash -c './node-1.4.21.1-linux-arm64'
 }
 
 function setup_grpc() {
-    wget --no-cache -O - https://raw.githubusercontent.com/lamat1111/quilibriumscripts/master/tools/qnode_gRPC_calls_setup.sh | bash
+    wget -O qnode_gRPC_setup.sh https://raw.githubusercontent.com/lamat1111/quilibriumscripts/master/tools/qnode_gRPC_calls_setup.sh && chmod +x qnode_gRPC_setup.sh && ./qnode_gRPC_setup.sh
 
     echo "gRPC 安装后，等待约30分钟生效"
 }
