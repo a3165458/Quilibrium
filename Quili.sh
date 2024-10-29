@@ -371,6 +371,12 @@ function update_script() {
     echo "脚本已更新。请退出脚本后，执行bash Quili.sh 重新运行此脚本。"
 }
 
+function claim_guide() {
+    echo "https://x.com/oxbaboon/status/1850850401148633506"
+    echo "请注意qclient 版本会更新，请根据实际qclient版本启动"
+    
+}
+
 # 主菜单
 function main_menu() {
     clear
@@ -393,8 +399,9 @@ function main_menu() {
     echo "5. 备份文件"
     echo "=========================收米查询================================"
     echo "6. 查询余额(需要先安装grpc)"
+    echo "15. 提币教程"
     
-    read -p "请输入选项（1-14）: " OPTION
+    read -p "请输入选项（1-15）: " OPTION
 
     case $OPTION in
     1) install_node ;;
@@ -408,6 +415,7 @@ function main_menu() {
     12) update_node_contabo ;;
     13) setup_grpc ;;
     14) update_new ;;
+    15)claim_guide ;;
     *) echo "无效选项。" ;;
     esac
 }
