@@ -148,6 +148,19 @@ function install_node() {
     # 确保目录存在
     mkdir -p "$HOME/ceremonyclient/node"
 
+    # 检查当前安装的节点版本
+    if [ -f "$HOME/ceremonyclient/node/node" ]; then
+        CURRENT_VERSION=$("$HOME/ceremonyclient/node/node" --version)
+        echo "当前安装的节点版本: $CURRENT_VERSION"
+
+        if [ "$CURRENT_VERSION" == "$NODE_VERSION" ]; then
+            echo "节点已是最新版本，无需更新。"
+            return
+        else
+            echo "节点版本不是最新的，正在下载最新版本..."
+        fi
+    fi
+
     # 根据操作系统和架构设置节点二进制文件名
     if [ "$OS" = "Linux" ]; then
         if [ "$ARCH" = "x86_64" ]; then
@@ -233,6 +246,19 @@ function install_node_contabo() {
 
     # 确保目录存在
     mkdir -p "$HOME/ceremonyclient/node"
+
+    # 检查当前安装的节点版本
+    if [ -f "$HOME/ceremonyclient/node/node" ]; then
+        CURRENT_VERSION=$("$HOME/ceremonyclient/node/node" --version)
+        echo "当前安装的节点版本: $CURRENT_VERSION"
+
+        if [ "$CURRENT_VERSION" == "$NODE_VERSION" ]; then
+            echo "节点已是最新版本，无需更新。"
+            return
+        else
+            echo "节点版本不是最新的，正在下载最新版本..."
+        fi
+    fi
 
     # 根据操作系统和架构设置节点二进制文件名
     if [ "$OS" = "Linux" ]; then
@@ -371,10 +397,10 @@ function update_script() {
     echo "脚本已更新。请退出脚本后，执行bash Quili.sh 重新运行此脚本。"
 }
 
+# 提币教程
 function claim_guide() {
     echo "请查阅 https://x.com/oxbaboon/status/1850850401148633506"
     echo "请注意qclient 版本会更新，请根据实际qclient版本启动"
-    
 }
 
 # 主菜单
@@ -415,7 +441,7 @@ function main_menu() {
     12) update_node_contabo ;;
     13) setup_grpc ;;
     14) update_new ;;
-    15)claim_guide ;;
+    15) claim_guide ;;
     *) echo "无效选项。" ;;
     esac
 }
