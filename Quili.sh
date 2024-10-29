@@ -28,6 +28,58 @@ function check_and_set_alias() {
     fi
 }
 
+# Qclient 安装功能
+function install_qclient() {
+    echo "正在更新 QCLIENT..."
+
+    # 基本 URL
+    BASE_URL="https://releases.quilibrium.com"
+
+    # 获取系统架构
+    ARCH=$(uname -m)
+    OS=$(uname -s)
+
+    # 根据系统架构设置 Qclient 二进制文件名
+    if [ "$OS" = "Linux" ]; then
+        if [ "$ARCH" = "x86_64" ]; then
+            QCLIENT_BINARY="qclient-latest-linux-amd64"
+        elif [ "$ARCH" = "aarch64" ]; then
+            QCLIENT_BINARY="qclient-latest-linux-arm64"
+        else
+            echo "Unsupported architecture: $ARCH"
+            exit 1
+        fi
+    elif [ "$OS" = "Darwin" ]; then
+        if [ "$ARCH" = "arm64" ]; then
+            QCLIENT_BINARY="qclient-latest-darwin-arm64"
+        else
+            echo "Unsupported architecture: $ARCH"
+            exit 1
+        fi
+    else
+        echo "Unsupported operating system: $OS"
+        exit 1
+    fi
+
+    # 确保目录存在
+    mkdir -p "$HOME/ceremonyclient/client"
+
+    # 下载 Qclient 二进制文件及其 dgst 和签名文件
+    cd "$HOME/ceremonyclient/client"
+    curl -L -o "$QCLIENT_BINARY" "$BASE_URL/$QCLIENT_BINARY" --fail --silent
+    curl -L -o "$QCLIENT_BINARY.dgst" "$BASE_URL/$QCLIENT_BINARY.dgst" --fail --silent
+
+    # 下载所有相关的签名文件
+    for i in {1..20}; do
+        curl -L -o "$QCLIENT_BINARY.dgst.sig.$i" "$BASE_URL/$QCLIENT_BINARY.dgst.sig.$i" --fail --silent
+    done
+
+    # 赋予执行权限
+    chmod +x "$QCLIENT_BINARY"
+
+    echo "✅ QCLIENT 安装完成。"
+}
+
 # 节点安装功能
 function install_node() {
     # 增加swap空间
@@ -134,6 +186,95 @@ function install_node() {
     # 启动节点
     screen -dmS Quili bash -c "./$NODE_BINARY"
 
+    # 安装 Qclient
+    install_qclient
+
+    echo "====================================== 安装完成 请退出脚本使用screen 命令或者使用查看日志功能查询状态 ======================================"
+}
+
+# 安装节点（针对contabo）
+function install_node_contabo() {
+    # 增加swap空间
+    sudo mkdir /swap
+    sudo fallocate -l 24G /swap/swapfile
+    sudo chmod 600 /swap/swapfile
+    sudo mkswap /swap/swapfile
+    sudo swapon /swap/swapfile
+    echo '/swap/swapfile swap swap defaults 0 0' >> /etc/fstab
+
+    # 向/etc/sysctl.conf文件追加内容
+    echo -e "\n# 自定义最大接收和发送缓冲区大小" >> /etc/sysctl.conf
+    echo "net.core.rmem_max=600000000" >> /etc/sysctl.conf
+    echo "net.core.wmem_max=600000000" >> /etc/sysctl.conf
+
+    echo "配置已添加到/etc/sysctl.conf"
+
+    # 重新加载sysctl配置以应用更改
+    sysctl -p
+
+    echo "sysctl配置已重新加载"
+
+    # 配置DNS
+    sudo sh -c 'echo "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /etc/resolv.conf'
+
+    # 更新并升级Ubuntu软件包
+    sudo apt update && sudo apt -y upgrade 
+
+    # 安装wget、screen和git等组件
+    sudo apt install git ufw bison screen binutils gcc make bsdmainutils cpulimit gawk -y
+
+    # 下载并安装gvm
+    bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)
+    source /root/.gvm/scripts/gvm
+
+    # 获取最新节点版本
+    NODE_VERSION=$(curl -s https://releases.quilibrium.com/release | grep -E "^node-[0-9]+(\.[0-9]+)*" | grep -v "dgst" | sed 's/^node-//' | cut -d '-' -f 1 | head -n 1)
+    echo "最新节点版本: $NODE_VERSION"
+
+    # 确保目录存在
+    mkdir -p "$HOME/ceremonyclient/node"
+
+    # 根据操作系统和架构设置节点二进制文件名
+    if [ "$OS" = "Linux" ]; then
+        if [ "$ARCH" = "x86_64" ]; then
+            NODE_BINARY="node-$NODE_VERSION-linux-amd64"
+        elif [ "$ARCH" = "aarch64" ]; then
+            NODE_BINARY="node-$NODE_VERSION-linux-arm64"
+        else
+            echo "Unsupported architecture: $ARCH"
+            exit 1
+        fi
+    elif [ "$OS" = "Darwin" ]; then
+        if [ "$ARCH" = "arm64" ]; then
+            NODE_BINARY="node-$NODE_VERSION-darwin-arm64"
+        else
+            echo "Unsupported architecture: $ARCH"
+            exit 1
+        fi
+    else
+        echo "Unsupported operating system: $OS"
+        exit 1
+    fi
+
+    # 下载节点二进制文件及其dgst和签名文件
+    cd "$HOME/ceremonyclient/node"
+    curl -L -o "$NODE_BINARY" "https://releases.quilibrium.com/$NODE_BINARY" --fail --silent
+    curl -L -o "$NODE_BINARY.dgst" "https://releases.quilibrium.com/$NODE_BINARY.dgst" --fail --silent
+
+    # 下载所有相关的签名文件
+    for i in {2,6,7,8,12,13,16}; do
+        curl -L -o "$NODE_BINARY.dgst.sig.$i" "https://releases.quilibrium.com/$NODE_BINARY.dgst.sig.$i" --fail --silent
+    done
+
+    # 赋予执行权限
+    chmod +x "$NODE_BINARY"
+
+    # 启动节点
+    screen -dmS Quili bash -c "./$NODE_BINARY"
+
+    # 安装 Qclient
+    install_qclient
+
     echo "====================================== 安装完成 请退出脚本使用screen 命令或者使用查看日志功能查询状态 ======================================"
 }
 
@@ -176,76 +317,6 @@ function run_node() {
     screen -dmS Quili bash -c "./$NODE_BINARY"
 
     echo "=======================已启动quilibrium 挖矿 请退出脚本使用screen 命令或者使用查看日志功能查询状态========================================="
-}
-
-function install_node_1.4.21() {
-    # 增加swap空间
-    sudo mkdir /swap
-    sudo fallocate -l 24G /swap/swapfile
-    sudo chmod 600 /swap/swapfile
-    sudo mkswap /swap/swapfile
-    sudo swapon /swap/swapfile
-    echo '/swap/swapfile swap swap defaults 0 0' >> /etc/fstab
-
-    # 向/etc/sysctl.conf文件追加内容
-    echo -e "\n# 自定义最大接收和发送缓冲区大小" >> /etc/sysctl.conf
-    echo "net.core.rmem_max=600000000" >> /etc/sysctl.conf
-    echo "net.core.wmem_max=600000000" >> /etc/sysctl.conf
-
-    echo "配置已添加到/etc/sysctl.conf"
-
-    # 重新加载sysctl配置以应用更改
-    sysctl -p
-
-    echo "sysctl配置已重新加载"
-
-    # 更新并升级Ubuntu软件包
-    sudo apt update && sudo apt -y upgrade 
-
-    # 安装wget、screen和git等组件
-    sudo apt install git ufw bison screen binutils gcc make bsdmainutils cpulimit gawk -y
-
-    # 下载并安装gvm
-    bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)
-    source /root/.gvm/scripts/gvm
-
-    # 获取系统架构
-    ARCH=$(uname -m)
-
-    # 安装并使用go1.4作为bootstrap
-    gvm install go1.4 -B
-    gvm use go1.4
-    export GOROOT_BOOTSTRAP=$GOROOT
-
-    # 根据系统架构安装相应的Go版本
-    if [ "$ARCH" = "x86_64" ]; then
-        gvm install go1.17.13
-        gvm use go1.17.13
-        export GOROOT_BOOTSTRAP=$GOROOT
-
-        gvm install go1.20.2
-        gvm use go1.20.2
-    elif [ "$ARCH" = "aarch64" ]; then
-        gvm install go1.17.13 -B
-        gvm use go1.17.13
-        export GOROOT_BOOTSTRAP=$GOROOT
-
-        gvm install go1.20.2 -B
-        gvm use go1.20.2
-    else
-        echo "Unsupported architecture: $ARCH"
-        exit 1
-    fi
-
-    git clone -b release-cdn https://git.dadunode.com/smeb_y/ceremonyclient.git
-
-    # 进入ceremonyclient/node目录
-    cd ceremonyclient/node 
-
-    # 创建一个screen会话并运行命令
-    screen -dmS Quili bash -c './node-1.4.21.1-linux-amd64'
-
-    echo "===================================== 安装完成 请退出脚本使用screen 命令或者使用查看日志功能查询状态========================================="
 }
 
 # 查看常规版本节点日志
@@ -298,133 +369,6 @@ function update_script() {
     curl -o $SCRIPT_PATH $SCRIPT_URL
     chmod +x $SCRIPT_PATH
     echo "脚本已更新。请退出脚本后，执行bash Quili.sh 重新运行此脚本。"
-}
-
-# 安装节点（针对contabo）
-function install_node_contabo() {
-    # 增加swap空间
-    sudo mkdir /swap
-    sudo fallocate -l 24G /swap/swapfile
-    sudo chmod 600 /swap/swapfile
-    sudo mkswap /swap/swapfile
-    sudo swapon /swap/swapfile
-    echo '/swap/swapfile swap swap defaults 0 0' >> /etc/fstab
-
-    # 向/etc/sysctl.conf文件追加内容
-    echo -e "\n# 自定义最大接收和发送缓冲区大小" >> /etc/sysctl.conf
-    echo "net.core.rmem_max=600000000" >> /etc/sysctl.conf
-    echo "net.core.wmem_max=600000000" >> /etc/sysctl.conf
-
-    echo "配置已添加到/etc/sysctl.conf"
-
-    # 重新加载sysctl配置以应用更改
-    sysctl -p
-
-    echo "sysctl配置已重新加载"
-
-    # 配置DNS
-    sudo sh -c 'echo "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /etc/resolv.conf'
-
-    # 更新并升级Ubuntu软件包
-    sudo apt update && sudo apt -y upgrade 
-
-    # 安装wget、screen和git等组件
-    sudo apt install git ufw bison screen binutils gcc make bsdmainutils cpulimit gawk -y
-
-    # 下载并安装gvm
-    bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)
-    source /root/.gvm/scripts/gvm
-
-    # 获取系统架构
-    ARCH=$(uname -m)
-    OS=$(uname -s)
-
-    # 安装并使用go1.4作为bootstrap
-    gvm install go1.4 -B
-    gvm use go1.4
-    export GOROOT_BOOTSTRAP=$GOROOT
-
-    # 根据系统架构安装相应的Go版本
-    if [ "$ARCH" = "x86_64" ]; then
-        gvm install go1.17.13
-        gvm use go1.17.13
-        export GOROOT_BOOTSTRAP=$GOROOT
-
-        gvm install go1.20.2
-        gvm use go1.20.2
-    elif [ "$ARCH" = "aarch64" ]; then
-        gvm install go1.17.13 -B
-        gvm use go1.17.13
-        export GOROOT_BOOTSTRAP=$GOROOT
-
-        gvm install go1.20.2 -B
-        gvm use go1.20.2
-    else
-        echo "Unsupported architecture: $ARCH"
-        exit 1
-    fi
-
-    # 获取最新节点版本
-    NODE_VERSION=$(curl -s https://releases.quilibrium.com/release | grep -E "^node-[0-9]+(\.[0-9]+)*" | grep -v "dgst" | sed 's/^node-//' | cut -d '-' -f 1 | head -n 1)
-    echo "最新节点版本: $NODE_VERSION"
-
-    # 确保目录存在
-    mkdir -p "$HOME/ceremonyclient/node"
-
-    # 根据操作系统和架构设置节点二进制文件名
-    if [ "$OS" = "Linux" ]; then
-        if [ "$ARCH" = "x86_64" ]; then
-            NODE_BINARY="node-$NODE_VERSION-linux-amd64"
-        elif [ "$ARCH" = "aarch64" ]; then
-            NODE_BINARY="node-$NODE_VERSION-linux-arm64"
-        else
-            echo "Unsupported architecture: $ARCH"
-            exit 1
-        fi
-    elif [ "$OS" = "Darwin" ]; then
-        if [ "$ARCH" = "arm64" ]; then
-            NODE_BINARY="node-$NODE_VERSION-darwin-arm64"
-        else
-            echo "Unsupported architecture: $ARCH"
-            exit 1
-        fi
-    else
-        echo "Unsupported operating system: $OS"
-        exit 1
-    fi
-
-    # 下载节点二进制文件及其dgst和签名文件
-    cd "$HOME/ceremonyclient/node"
-    curl -L -o "$NODE_BINARY" "https://releases.quilibrium.com/$NODE_BINARY" --fail --silent
-    curl -L -o "$NODE_BINARY.dgst" "https://releases.quilibrium.com/$NODE_BINARY.dgst" --fail --silent
-
-    # 下载所有相关的签名文件
-    for i in {2,6,7,8,12,13,16}; do
-        curl -L -o "$NODE_BINARY.dgst.sig.$i" "https://releases.quilibrium.com/$NODE_BINARY.dgst.sig.$i" --fail --silent
-    done
-
-    # 赋予执行权限
-    chmod +x "$NODE_BINARY"
-
-    # 启动节点
-    screen -dmS Quili bash -c "./$NODE_BINARY"
-
-    echo "====================================== 安装完成 请退出脚本使用screen 命令或者使用查看日志功能查询状态 ======================================"
-}
-
-function setup_grpc() {
-    wget -O qnode_gRPC_setup.sh https://raw.githubusercontent.com/lamat1111/quilibriumscripts/master/tools/qnode_gRPC_calls_setup.sh && chmod +x qnode_gRPC_setup.sh && ./qnode_gRPC_setup.sh
-
-    echo "gRPC 安装后，等待约30分钟生效"
-}
-
-function update_new() {
-    mkdir -p ~/scripts && \
-    wget -O ~/scripts/qnode_service_change_autorun_to_bin.sh "https://raw.githubusercontent.com/lamat1111/QuilibriumScripts/main/tools/qnode_service_change_autorun_to_bin.sh" && \
-    chmod +x ~/scripts/qnode_service_change_autorun_to_bin.sh && \
-    ~/scripts/qnode_service_change_autorun_to_bin.sh
-
-    wget --no-cache -O - https://raw.githubusercontent.com/lamat1111/QuilibriumScripts/master/qnode_service_update.sh | bash
 }
 
 # 主菜单
