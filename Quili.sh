@@ -372,7 +372,7 @@ function update_script() {
 }
 
 function claim_guide() {
-    echo "https://x.com/oxbaboon/status/1850850401148633506"
+    echo "请查阅 https://x.com/oxbaboon/status/1850850401148633506"
     echo "请注意qclient 版本会更新，请根据实际qclient版本启动"
     
 }
