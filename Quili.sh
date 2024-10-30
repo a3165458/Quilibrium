@@ -418,6 +418,85 @@ function setup_grpc() {
     echo "gRPC 安装后，等待约30分钟生效"
 }
 
+# Qclient 安装功能
+function install_qclient() {
+    echo "正在更新 QCLIENT..."
+
+    # 基本 URL
+    BASE_URL="https://releases.quilibrium.com"
+
+    # 获取 Qclient 最新版本
+    QCLIENT_VERSION=$(curl -s https://releases.quilibrium.com/qclient-release | grep -E "^qclient-[0-9]+(\.[0-9]+)*" | sed 's/^qclient-//' | cut -d '-' -f 1 | head -n 1)
+    if [ -z "$QCLIENT_VERSION" ]; then
+        echo "⚠️ 无法自动确定 Qclient 版本。请检查网络连接或手动安装。"
+        exit 1
+    else
+        echo "✅ 最新 Qclient 版本: $QCLIENT_VERSION"
+    fi
+
+    # 根据系统架构和操作系统设置 Qclient 二进制文件名
+    if [ "$ARCH" = "x86_64" ]; then
+        if [ "$OS" = "Linux" ]; then
+            QCLIENT_BINARY="qclient-$QCLIENT_VERSION-linux-amd64"
+        elif [ "$OS" = "Darwin" ]; then
+            QCLIENT_BINARY="qclient-$QCLIENT_VERSION-darwin-amd64"
+        fi
+    elif [ "$ARCH" = "aarch64" ]; then
+        if [ "$OS" = "Linux" ]; then
+            QCLIENT_BINARY="qclient-$QCLIENT_VERSION-linux-arm64"
+        elif [ "$OS" = "Darwin" ]; then
+            QCLIENT_BINARY="qclient-$QCLIENT_VERSION-darwin-arm64"
+        fi
+    else
+        echo "❌ 不支持的系统架构 ($ARCH) 或操作系统 ($OS)。"
+        exit 1
+    fi
+
+    echo "QCLIENT_BINARY 设置为: $QCLIENT_BINARY"
+
+    # 确保目录存在
+    mkdir -p "$HOME/ceremonyclient/client"
+
+    # 切换到下载目录
+    cd "$HOME/ceremonyclient/client" || { echo "❌ 无法切换到下载目录"; exit 1; }
+
+    # 下载并覆盖文件的函数
+    download_and_overwrite() {
+        local url="$1"
+        local filename="$2"
+        if wget -q -O "$filename" "$url"; then
+            echo "✅ 成功下载 $filename"
+            return 0
+        else
+            echo "❌ 下载 $filename 失败"
+            return 1
+        fi
+    }
+
+    # 下载主二进制文件
+    echo "下载 $QCLIENT_BINARY..."
+    if download_and_overwrite "$BASE_URL/$QCLIENT_BINARY" "$QCLIENT_BINARY"; then
+        chmod +x "$QCLIENT_BINARY"
+    else
+        echo "❌ 下载过程中出错：可能需要手动安装。"
+        exit 1
+    fi
+
+    # 下载 .dgst 文件
+    echo "下载 ${QCLIENT_BINARY}.dgst..."
+    download_and_overwrite "$BASE_URL/${QCLIENT_BINARY}.dgst" "${QCLIENT_BINARY}.dgst"
+
+    # 下载签名文件
+    echo "下载签名文件..."
+    for i in {1..20}; do
+        sig_file="${QCLIENT_BINARY}.dgst.sig.${i}"
+        if wget -q --spider "$BASE_URL/$sig_file" 2>/dev/null; then
+            download_and_overwrite "$BASE_URL/$sig_file" "$sig_file"
+        fi
+    done
+
+    echo "下载过程完成。"
+}
 
 # 主菜单
 function main_menu() {
@@ -435,6 +514,7 @@ function main_menu() {
     echo "12. 升级节点程序版本(针对contabo)"
     echo "13. 安装grpc"
     echo "14. 老版本1.4.21升级2.0(截至10.24日，2.0已正式开始挖矿)"
+    echo "16. 安装qclient"
     echo "=======================单独使用功能============================="
     echo "4. 独立启动挖矿（适合安装成功后，中途退出后再启动）"
     echo "=========================备份功能================================"
@@ -443,7 +523,7 @@ function main_menu() {
     echo "6. 查询余额(需要先安装grpc)"
     echo "15. 提币教程"
     
-    read -p "请输入选项（1-15）: " OPTION
+    read -p "请输入选项（1-16）: " OPTION
 
     case $OPTION in
     1) install_node ;;
@@ -458,6 +538,7 @@ function main_menu() {
     13) setup_grpc ;;
     14) update_new ;;
     15) claim_guide ;;
+    16) install_qclient ;;
     *) echo "无效选项。" ;;
     esac
 }
