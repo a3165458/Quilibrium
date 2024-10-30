@@ -412,6 +412,13 @@ function update_new() {
     wget --no-cache -O - https://raw.githubusercontent.com/lamat1111/QuilibriumScripts/master/qnode_service_update.sh | bash
 }
 
+function setup_grpc() {
+    wget -O qnode_gRPC_setup.sh https://raw.githubusercontent.com/lamat1111/quilibriumscripts/master/tools/qnode_gRPC_calls_setup.sh && chmod +x qnode_gRPC_setup.sh && ./qnode_gRPC_setup.sh
+
+    echo "gRPC 安装后，等待约30分钟生效"
+}
+
+
 # 主菜单
 function main_menu() {
     clear
