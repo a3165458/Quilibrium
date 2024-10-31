@@ -30,54 +30,82 @@ function check_and_set_alias() {
 
 # Qclient 安装功能
 function install_qclient() {
-    echo "正在更新 QCLIENT..."
+# 确定系统架构和操作系统
+ARCH=$(uname -m)
+OS=$(uname -s)
 
-    # 基本 URL
-    BASE_URL="https://releases.quilibrium.com"
+BASE_URL="https://releases.quilibrium.com"
 
-    # 获取系统架构
-    ARCH=$(uname -m)
-    OS=$(uname -s)
-
-    # 根据系统架构设置 Qclient 二进制文件名
-    if [ "$OS" = "Linux" ]; then
-        if [ "$ARCH" = "x86_64" ]; then
-            QCLIENT_BINARY="qclient-latest-linux-amd64"
-        elif [ "$ARCH" = "aarch64" ]; then
-            QCLIENT_BINARY="qclient-latest-linux-arm64"
-        else
-            echo "Unsupported architecture: $ARCH"
-            exit 1
-        fi
-    elif [ "$OS" = "Darwin" ]; then
-        if [ "$ARCH" = "arm64" ]; then
-            QCLIENT_BINARY="qclient-latest-darwin-arm64"
-        else
-            echo "Unsupported architecture: $ARCH"
-            exit 1
-        fi
-    else
-        echo "Unsupported operating system: $OS"
+# 如果未指定，确定 qclient 的最新版本
+if [ -z "$QCLIENT_VERSION" ]; then
+    QCLIENT_VERSION=$(curl -s "$BASE_URL/qclient-release" | grep -E "^qclient-[0-9]+(\.[0-9]+)*" | sed 's/^qclient-//' | cut -d '-' -f 1 | head -n 1)
+    if [ -z "$QCLIENT_VERSION" ]; then
+        echo "⚠️ 警告：无法自动确定 Qclient 版本。"
+        echo "请检查您的网络设置或尝试手动安装。"
         exit 1
+    else
+        echo "✅ 最新的 Qclient 版本：$QCLIENT_VERSION"
     fi
+else
+    echo "✅ 使用指定的 Qclient 版本：$QCLIENT_VERSION"
+fi
 
-    # 确保目录存在
-    mkdir -p "$HOME/ceremonyclient/client"
+# 根据架构和操作系统确定节点二进制文件名称
+case "$ARCH-$OS" in
+    x86_64-Linux) QCLIENT_BINARY="qclient-$QCLIENT_VERSION-linux-amd64" ;;
+    x86_64-Darwin) QCLIENT_BINARY="qclient-$QCLIENT_VERSION-darwin-amd64" ;;
+    aarch64-Linux) QCLIENT_BINARY="qclient-$QCLIENT_VERSION-linux-arm64" ;;
+    aarch64-Darwin) QCLIENT_BINARY="qclient-$QCLIENT_VERSION-darwin-arm64" ;;
+    *) 
+        echo "❌ 错误：不支持的系统架构 ($ARCH) 或操作系统 ($OS)。"
+        exit 1
+        ;;
+esac
 
-    # 下载 Qclient 二进制文件及其 dgst 和签名文件
-    cd "$HOME/ceremonyclient/client"
-    curl -L -o "$QCLIENT_BINARY" "$BASE_URL/$QCLIENT_BINARY" --fail --silent
-    curl -L -o "$QCLIENT_BINARY.dgst" "$BASE_URL/$QCLIENT_BINARY.dgst" --fail --silent
+echo "QCLIENT_BINARY 设置为：$QCLIENT_BINARY"
 
-    # 下载所有相关的签名文件
-    for i in {1..20}; do
-        curl -L -o "$QCLIENT_BINARY.dgst.sig.$i" "$BASE_URL/$QCLIENT_BINARY.dgst.sig.$i" --fail --silent
-    done
+# 如果目录不存在则创建
+mkdir -p "$HOME/ceremonyclient/client" && echo "目录创建成功。"
 
-    # 赋予执行权限
+# 切换到下载目录
+cd "$HOME/ceremonyclient/client" || { echo "❌ 错误：无法切换到下载目录"; exit 1; }
+
+# 下载文件并覆盖的函数
+download_and_overwrite() {
+    local url="$1"
+    local filename="$2"
+    if wget -q -O "$filename" "$url"; then
+        echo "✅ 成功下载 $filename"
+        return 0
+    else
+        echo "❌ 错误：下载 $filename 失败"
+        return 1
+    fi
+}
+
+# 下载主二进制文件
+echo "正在下载 $QCLIENT_BINARY..."
+if download_and_overwrite "$BASE_URL/$QCLIENT_BINARY" "$QCLIENT_BINARY"; then
     chmod +x "$QCLIENT_BINARY"
+else
+    echo "❌ 下载过程中出错：可能需要手动安装。"
+    exit 1
+fi
 
-    echo "✅ QCLIENT 安装完成。"
+# 下载 .dgst 文件
+echo "正在下载 ${QCLIENT_BINARY}.dgst..."
+download_and_overwrite "$BASE_URL/${QCLIENT_BINARY}.dgst" "${QCLIENT_BINARY}.dgst"
+
+# 下载签名文件
+echo "正在下载签名文件..."
+for i in {1..20}; do
+    sig_file="${QCLIENT_BINARY}.dgst.sig.${i}"
+    if wget -q --spider "$BASE_URL/$sig_file"; then
+        download_and_overwrite "$BASE_URL/$sig_file" "$sig_file"
+    fi
+done
+
+echo "下载过程完成。"
 }
 
 # 节点安装功能
