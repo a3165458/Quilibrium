@@ -441,13 +441,63 @@ function claim_guide() {
 }
 
 function update_new() {
-    mkdir -p ~/scripts && \
-    wget -O ~/scripts/qnode_service_change_autorun_to_bin.sh "https://raw.githubusercontent.com/lamat1111/QuilibriumScripts/main/tools/qnode_service_change_autorun_to_bin.sh" && \
-    chmod +x ~/scripts/qnode_service_change_autorun_to_bin.sh && \
-    ~/scripts/qnode_service_change_autorun_to_bin.sh
+    # 获取系统架构和操作系统
+    ARCH=$(uname -m)
+    OS=$(uname -s)
 
-    wget --no-cache -O - https://raw.githubusercontent.com/lamat1111/QuilibriumScripts/master/qnode_service_update.sh | bash
+    # 根据操作系统和架构设置 OS_ARCH 变量
+    if [[ "$OS" == "Linux" ]]; then
+        if [[ "$ARCH" == "x86_64" ]]; then
+            OS_ARCH="linux-amd64"
+        elif [[ "$ARCH" == "aarch64" ]]; then
+            OS_ARCH="linux-arm64"
+        else
+            echo "不支持的 Linux 架构: $ARCH"
+            exit 1
+        fi
+    elif [[ "$OS" == "Darwin" ]]; then
+        if [[ "$ARCH" == "arm64" ]]; then
+            OS_ARCH="darwin-arm64"
+        elif [[ "$ARCH" == "x86_64" ]]; then
+            OS_ARCH="darwin-amd64"
+        else
+            echo "不支持的 macOS 架构: $ARCH"
+            exit 1
+        fi
+    else
+        echo "不支持的操作系统: $OS"
+        exit 1
+    fi
+
+    # 确保节点目录存在
+    mkdir -p "$HOME/ceremonyclient/node"
+
+    # 进入节点目录
+    cd "$HOME/ceremonyclient/node" || { echo "❌ 无法切换到节点目录"; exit 1; }
+
+    # 定义发布文件的 URL
+    RELEASE_FILES_URL="https://releases.quilibrium.com/release"
+
+    # 获取所有相关的发布文件
+    RELEASE_FILES=$(curl -s "$RELEASE_FILES_URL" | grep -oE "node-[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?-${OS_ARCH}(\.dgst)?(\.sig\.[0-9]+)?")
+
+    # 下载所有相关的文件
+    for file in $RELEASE_FILES; do
+        echo "正在下载 $file..."
+        wget "https://releases.quilibrium.com/$file" --quiet --show-progress
+    done
+
+    # 赋予下载的节点二进制文件执行权限
+    chmod +x node-2*
+
+    # 启动节点
+    NODE_BINARY=$(ls node-2*)  # 获取最新的节点二进制文件名
+    screen -dmS Quili bash -c "./$NODE_BINARY"
+
+    echo "====================================== 节点更新完成，请使用 screen 命令查看状态 ======================================"
 }
+}
+
 
 function setup_grpc() {
     wget -O qnode_gRPC_setup.sh https://raw.githubusercontent.com/lamat1111/quilibriumscripts/master/tools/qnode_gRPC_calls_setup.sh && chmod +x qnode_gRPC_setup.sh && ./qnode_gRPC_setup.sh
@@ -563,7 +613,7 @@ function main_menu() {
     echo "11. 安装常规节点(针对contabo)"
     echo "12. 升级节点程序版本(针对contabo)"
     echo "13. 安装grpc"
-    echo "14. 老版本1.4.21升级2.0(截至10.24日，2.0已正式开始挖矿)"
+    echo "14. 升级节点程序(截至10.24日，2.0已正式开始挖矿)"
     echo "16. 安装qclient"
     echo "=======================单独使用功能============================="
     echo "4. 独立启动挖矿（适合安装成功后，中途退出后再启动）"
