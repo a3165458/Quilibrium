@@ -417,8 +417,13 @@ function update_node_contabo() {
     # 配置DNS
     sudo sh -c 'echo "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /etc/resolv.conf'
     
-    # 调用常规节点安装逻辑
-    install_node_contabo
+    
+    mkdir -p ~/scripts && \
+    wget -O ~/scripts/qnode_service_change_autorun_to_bin.sh "https://raw.githubusercontent.com/lamat1111/QuilibriumScripts/main/tools/qnode_service_change_autorun_to_bin.sh" && \
+    chmod +x ~/scripts/qnode_service_change_autorun_to_bin.sh && \
+    ~/scripts/qnode_service_change_autorun_to_bin.sh
+
+    wget --no-cache -O - https://raw.githubusercontent.com/lamat1111/QuilibriumScripts/master/qnode_service_update.sh | bash
 }
 
 # 更新本脚本
