@@ -452,82 +452,95 @@ function setup_grpc() {
 
 # Qclient 安装功能
 function install_qclient() {
-    echo "正在更新 QCLIENT..."
 
-    # 基本 URL
-    BASE_URL="https://releases.quilibrium.com"
+# 确定系统架构和操作系统
+ARCH=$(uname -m)
+OS=$(uname -s)
 
-    # 获取 Qclient 最新版本
-    QCLIENT_VERSION=$(curl -s https://releases.quilibrium.com/qclient-release | grep -E "^qclient-[0-9]+(\.[0-9]+)*" | sed 's/^qclient-//' | cut -d '-' -f 1 | head -n 1)
-    if [ -z "$QCLIENT_VERSION" ]; then
-        echo "⚠️ 无法自动确定 Qclient 版本。请检查网络连接或手动安装。"
-        exit 1
-    else
-        echo "✅ 最新 Qclient 版本: $QCLIENT_VERSION"
+# 打印架构和操作系统以进行调试
+echo "系统架构: $ARCH"
+echo "操作系统: $OS"
+
+echo "正在更新 QCLIENT..."
+
+# 基本 URL
+BASE_URL="https://releases.quilibrium.com"
+
+# 获取 Qclient 最新版本
+QCLIENT_VERSION=$(curl -s "$BASE_URL/qclient-release" | grep -E "^qclient-[0-9]+(\.[0-9]+)*" | sed 's/^qclient-//' | cut -d '-' -f 1 | head -n 1)
+if [ -z "$QCLIENT_VERSION" ]; then
+    echo "⚠️ 无法自动确定 Qclient 版本。请检查网络连接或手动安装。"
+    exit 1
+else
+    echo "✅ 最新 Qclient 版本: $QCLIENT_VERSION"
+fi
+
+# 根据系统架构和操作系统设置 Qclient 二进制文件名
+if [ "$ARCH" = "x86_64" ]; then
+    if [ "$OS" = "Linux" ]; then
+        QCLIENT_BINARY="qclient-$QCLIENT_VERSION-linux-amd64"
+    elif [ "$OS" = "Darwin" ]; then
+        QCLIENT_BINARY="qclient-$QCLIENT_VERSION-darwin-amd64"
     fi
-
-    # 根据系统架构和操作系统设置 Qclient 二进制文件名
-    if [ "$ARCH" = "x86_64" ]; then
-        if [ "$OS" = "Linux" ]; then
-            QCLIENT_BINARY="qclient-$QCLIENT_VERSION-linux-amd64"
-        elif [ "$OS" = "Darwin" ]; then
-            QCLIENT_BINARY="qclient-$QCLIENT_VERSION-darwin-amd64"
-        fi
-    elif [ "$ARCH" = "aarch64" ]; then
-        if [ "$OS" = "Linux" ]; then
-            QCLIENT_BINARY="qclient-$QCLIENT_VERSION-linux-arm64"
-        elif [ "$OS" = "Darwin" ]; then
-            QCLIENT_BINARY="qclient-$QCLIENT_VERSION-darwin-arm64"
-        fi
-    else
-        echo "❌ 不支持的系统架构 ($ARCH) 或操作系统 ($OS)。"
-        exit 1
+elif [ "$ARCH" = "aarch64" ]; then
+    if [ "$OS" = "Linux" ]; then
+        QCLIENT_BINARY="qclient-$QCLIENT_VERSION-linux-arm64"
+    elif [ "$OS" = "Darwin" ]; then
+        QCLIENT_BINARY="qclient-$QCLIENT_VERSION-darwin-arm64"
     fi
+else
+    echo "❌ 不支持的系统架构 ($ARCH) 或操作系统 ($OS)。"
+    exit 1
+fi
 
-    echo "QCLIENT_BINARY 设置为: $QCLIENT_BINARY"
+echo "QCLIENT_BINARY 设置为: $QCLIENT_BINARY"
 
-    # 确保目录存在
-    mkdir -p "$HOME/ceremonyclient/client"
+# 确保目录存在
+mkdir -p "$HOME/ceremonyclient/client"
 
-    # 切换到下载目录
-    cd "$HOME/ceremonyclient/client" || { echo "❌ 无法切换到下载目录"; exit 1; }
+# 切换到下载目录
+cd "$HOME/ceremonyclient/client" || { echo "❌ 无法切换到下载目录"; exit 1; }
 
-    # 下载并覆盖文件的函数
-    download_and_overwrite() {
-        local url="$1"
-        local filename="$2"
-        if wget -q -O "$filename" "$url"; then
-            echo "✅ 成功下载 $filename"
-            return 0
-        else
-            echo "❌ 下载 $filename 失败"
-            return 1
-        fi
-    }
-
-    # 下载主二进制文件
-    echo "下载 $QCLIENT_BINARY..."
-    if download_and_overwrite "$BASE_URL/$QCLIENT_BINARY" "$QCLIENT_BINARY"; then
-        chmod +x "$QCLIENT_BINARY"
+# 下载并覆盖文件的函数
+download_and_overwrite() {
+    local url="$1"
+    local filename="$2"
+    if wget -q -O "$filename" "$url"; then
+        echo "✅ 成功下载 $filename"
+        return 0
     else
-        echo "❌ 下载过程中出错：可能需要手动安装。"
-        exit 1
+        echo "❌ 下载 $filename 失败"
+        return 1
     fi
+}
 
-    # 下载 .dgst 文件
-    echo "下载 ${QCLIENT_BINARY}.dgst..."
-    download_and_overwrite "$BASE_URL/${QCLIENT_BINARY}.dgst" "${QCLIENT_BINARY}.dgst"
+# 下载主二进制文件
+echo "下载 $QCLIENT_BINARY..."
+if download_and_overwrite "$BASE_URL/$QCLIENT_BINARY" "$QCLIENT_BINARY"; then
+    chmod +x "$QCLIENT_BINARY"
+else
+    echo "❌ 下载过程中出错：可能需要手动安装。"
+    exit 1
+fi
 
-    # 下载签名文件
-    echo "下载签名文件..."
-    for i in {1..20}; do
-        sig_file="${QCLIENT_BINARY}.dgst.sig.${i}"
-        if wget -q --spider "$BASE_URL/$sig_file" 2>/dev/null; then
-            download_and_overwrite "$BASE_URL/$sig_file" "$sig_file"
+# 下载 .dgst 文件
+echo "下载 ${QCLIENT_BINARY}.dgst..."
+if ! download_and_overwrite "$BASE_URL/${QCLIENT_BINARY}.dgst" "${QCLIENT_BINARY}.dgst"; then
+    echo "❌ 下载 .dgst 文件失败。"
+    exit 1
+fi
+
+# 下载签名文件
+echo "下载签名文件..."
+for i in {1..20}; do
+    sig_file="${QCLIENT_BINARY}.dgst.sig.${i}"
+    if wget -q --spider "$BASE_URL/$sig_file"; then
+        if ! download_and_overwrite "$BASE_URL/$sig_file" "$sig_file"; then
+            echo "❌ 下载签名文件 $sig_file 失败。"
         fi
-    done
-
-    echo "下载过程完成。"
+    fi
+done
+echo "下载过程完成。"
 }
 
 # 主菜单
