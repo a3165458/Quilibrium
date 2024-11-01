@@ -170,6 +170,8 @@ function install_node() {
     fi
 
     # 获取最新节点版本
+    cd $HOME
+    git clone https://source.quilibrium.com/quilibrium/ceremonyclient.git
     NODE_VERSION=$(curl -s https://releases.quilibrium.com/release | grep -E "^node-[0-9]+(\.[0-9]+)*" | grep -v "dgst" | sed 's/^node-//' | cut -d '-' -f 1 | head -n 1)
     echo "最新节点版本: $NODE_VERSION"
 
@@ -269,6 +271,8 @@ function install_node_contabo() {
     source /root/.gvm/scripts/gvm
 
     # 获取最新节点版本
+    cd $HOME
+    git clone https://source.quilibrium.com/quilibrium/ceremonyclient.git
     NODE_VERSION=$(curl -s https://releases.quilibrium.com/release | grep -E "^node-[0-9]+(\.[0-9]+)*" | grep -v "dgst" | sed 's/^node-//' | cut -d '-' -f 1 | head -n 1)
     echo "最新节点版本: $NODE_VERSION"
 
