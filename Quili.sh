@@ -136,38 +136,11 @@ function install_node() {
     # 安装wget、screen和git等组件
     sudo apt install git ufw bison screen binutils gcc make bsdmainutils cpulimit gawk -y
 
-    # 下载并安装gvm
-    bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)
-    source /root/.gvm/scripts/gvm
 
     # 获取系统架构
     ARCH=$(uname -m)
     OS=$(uname -s)
 
-    # 安装并使用go1.4作为bootstrap
-    gvm install go1.4 -B
-    gvm use go1.4
-    export GOROOT_BOOTSTRAP=$GOROOT
-
-    # 根据系统架构安装相应的Go版本
-    if [ "$ARCH" = "x86_64" ]; then
-        gvm install go1.17.13
-        gvm use go1.17.13
-        export GOROOT_BOOTSTRAP=$GOROOT
-
-        gvm install go1.20.2
-        gvm use go1.20.2
-    elif [ "$ARCH" = "aarch64" ]; then
-        gvm install go1.17.13 -B
-        gvm use go1.17.13
-        export GOROOT_BOOTSTRAP=$GOROOT
-
-        gvm install go1.20.2 -B
-        gvm use go1.20.2
-    else
-        echo "Unsupported architecture: $ARCH"
-        exit 1
-    fi
 
     # 获取最新节点版本
     cd $HOME
@@ -219,7 +192,7 @@ function install_node() {
     curl -L -o "$NODE_BINARY.dgst" "https://releases.quilibrium.com/$NODE_BINARY.dgst" --fail --silent
 
     # 下载所有相关的签名文件
-    for i in {2,6,7,8,12,13,16}; do
+    for i in {1..20}; do
         curl -L -o "$NODE_BINARY.dgst.sig.$i" "https://releases.quilibrium.com/$NODE_BINARY.dgst.sig.$i" --fail --silent
     done
 
@@ -320,7 +293,7 @@ function install_node_contabo() {
     curl -L -o "$NODE_BINARY.dgst" "https://releases.quilibrium.com/$NODE_BINARY.dgst" --fail --silent
 
     # 下载所有相关的签名文件
-    for i in {2,6,7,8,12,13,16}; do
+    for i in {1..20}; do
         curl -L -o "$NODE_BINARY.dgst.sig.$i" "https://releases.quilibrium.com/$NODE_BINARY.dgst.sig.$i" --fail --silent
     done
 
