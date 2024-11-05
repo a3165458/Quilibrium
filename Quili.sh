@@ -570,6 +570,48 @@ done
 echo "下载过程完成。"
 }
 
+
+function install_node_1.4.21() {
+
+# 增加swap空间
+sudo mkdir /swap
+sudo fallocate -l 24G /swap/swapfile
+sudo chmod 600 /swap/swapfile
+sudo mkswap /swap/swapfile
+sudo swapon /swap/swapfile
+echo '/swap/swapfile swap swap defaults 0 0' >> /etc/fstab
+
+# 向/etc/sysctl.conf文件追加内容
+echo -e "\n# 自定义最大接收和发送缓冲区大小" >> /etc/sysctl.conf
+echo "net.core.rmem_max=600000000" >> /etc/sysctl.conf
+echo "net.core.wmem_max=600000000" >> /etc/sysctl.conf
+
+echo "配置已添加到/etc/sysctl.conf"
+
+# 重新加载sysctl配置以应用更改
+sysctl -p
+
+echo "sysctl配置已重新加载"
+
+# 更新并升级Ubuntu软件包
+sudo apt update && sudo apt -y upgrade 
+
+# 安装wget、screen和git等组件
+sudo apt install git ufw bison screen binutils gcc make bsdmainutils cpulimit gawk -y
+
+git clone -b release-cdn https://git.dadunode.com/smeb_y/ceremonyclient.git
+
+# 进入ceremonyclient/node目录
+cd ceremonyclient/node 
+
+
+# 创建一个screen会话并运行命令
+screen -dmS Quili bash -c './node-1.4.21.1-linux-amd64'
+
+echo ====================================== 安装完成 请退出脚本使用screen 命令或者使用查看日志功能查询状态=========================================
+
+}
+
 # 主菜单
 function main_menu() {
     clear
