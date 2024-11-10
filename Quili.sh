@@ -464,9 +464,15 @@ function update_new() {
     chmod +x node-2*
 
     # 启动节点
-    NODE_BINARY=$(ls node-2*)  # 获取最新的节点二进制文件名
-    screen -dmS Quili bash -c "./$NODE_BINARY"
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    NODE_BINARY=$(ls node-2* | grep -E 'linux-amd64$' | sort -V | tail -n 1)  
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    NODE_BINARY=$(ls node-2* | grep -E 'darwin-arm64$' | sort -V | tail -n 1)  
+    echo "Unsupported OS: $OSTYPE"
+    exit 1
+fi
 
+screen -dmS Quili bash -c "./$NODE_BINARY"
     echo "====================================== 节点更新完成，请使用 screen 命令查看状态 ======================================"
 }
 
